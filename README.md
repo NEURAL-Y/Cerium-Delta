@@ -144,12 +144,6 @@ A central focus of Cerium Delta is the development of architecture-aware metrics
 - [ ] JAX
 - [ ] ONNX
 
-## Advanced Architectures
-- [ ] Transformers
-- [ ] Graph Neural Networks (GNNs)
-- [ ] Convolutional Neural Networks (CNNs)
-- [ ] Diffusion Models
-
 ## Platform
 - [ ] Real-Time Dashboard
 - [ ] Architecture Timeline
