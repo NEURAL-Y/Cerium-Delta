@@ -1,24 +1,58 @@
-# Cerium Delta CODEOWNERS
-# ========================
-# This file automatically requests reviews from code owners
-# when someone opens a Pull Request.
+```text
+###############################################################################
+#                             CERIUM DELTA
+#                    Official CODEOWNERS Configuration
+#
+# Every pull request touching the files below automatically requests
+# review from the designated code owner.
+#
+# Maintainer
+# ----------
+# @NEURAL-Y
+###############################################################################
 
-# Default owner for everything in the repository
-*       @NEURAL-Y
+###############################################################################
+# 🌍 Global Ownership
+###############################################################################
 
-# Documentation
-*.md                @NEURAL-Y
-/docs/              @NEURAL-Y
+# Everything in this repository
+*                               @NEURAL-Y
 
-# Public assets (logo, images, etc.)
-/public/            @NEURAL-Y
+###############################################################################
+# 📚 Documentation
+###############################################################################
 
-# Configuration & packaging files
-pyproject.toml      @NEURAL-Y
-setup.py            @NEURAL-Y
-setup.cfg           @NEURAL-Y
-.gitignore          @NEURAL-Y
-LICENSE             @NEURAL-Y
+*.md                            @NEURAL-Y
+/docs/                          @NEURAL-Y
 
-# GitHub specific files
-.github/            @NEURAL-Y
+###############################################################################
+# 🎨 Public Assets
+###############################################################################
+
+/public/                        @NEURAL-Y
+
+###############################################################################
+# ⚙️ Python Packaging & Configuration
+###############################################################################
+
+pyproject.toml                  @NEURAL-Y
+setup.py                        @NEURAL-Y
+setup.cfg                       @NEURAL-Y
+
+###############################################################################
+# 🔒 Repository Configuration
+###############################################################################
+
+.gitignore                      @NEURAL-Y
+LICENSE                         @NEURAL-Y
+
+###############################################################################
+# 🚀 GitHub Infrastructure
+###############################################################################
+
+.github/                        @NEURAL-Y
+
+###############################################################################
+# End of File
+###############################################################################
+```
