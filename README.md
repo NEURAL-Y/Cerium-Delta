@@ -141,8 +141,9 @@ A central focus of Cerium Delta is the development of architecture-aware metrics
 ## Framework Support
 - [ ] PyTorch
 - [ ] TensorFlow
-- [ ] JAX
+- [ ] JAX(under development)
 - [ ] ONNX
+- [ ] scikit-learn
 
 ## Platform
 - [ ] Real-Time Dashboard
