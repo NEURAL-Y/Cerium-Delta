@@ -1,39 +1,131 @@
-## Becoming a Core Contributor
+# 🌟 Becoming a Core Contributor
 
-We welcome everyone to contribute to Cerium Delta. However, the ability to **review Pull Requests**, **merge code**, and **make project decisions** is reserved for **Core Contributors**.
+Cerium Delta is built through community collaboration. Every contribution, whether it is a bug fix, feature, documentation improvement, or research enhancement, helps move the project forward.
 
-### How to become a Core Contributor
-
-To be promoted to a Core Contributor, you must meet **one** of the following criteria:
-
-- Successfully merge **at least 10 Pull Requests** that create a **major impact** on the project  
-  (examples: new features, architecture improvements, significant performance gains, major documentation, etc.)
-
-**OR**
-
-- Successfully merge **at least 15 Pull Requests** focused on **bug fixing**, **code improvements**, and **issue resolution**.
-
-After meeting the above requirement, existing Core Contributors will review your overall contribution quality and decide on your promotion.
+Core Contributors are trusted community members responsible for maintaining the project's quality, stability, and long-term direction.
 
 ---
 
-### Rights of a Core Contributor
+# 📈 Eligibility
 
-Once promoted, you will have the following permissions:
+To be considered for promotion, a contributor should demonstrate **consistent, high-quality contributions** over time.
 
-- Review and approve Pull Requests from other contributors
-- Merge Pull Requests (after proper review)
-- Participate in project decisions together with other Core Contributors
-- Work directly on `dev` and `testing` branches
-- Commit and push code to `dev` / `testing` branches
+A contributor will generally qualify after meeting **one** of the following guidelines:
 
-### Important Rules after Promotion
+### Option A • Major Contributions
 
-Even as a Core Contributor:
+Successfully contribute **10 or more significant Pull Requests**, such as:
 
-- All changes must still be reviewed by **at least two other Core Contributor**
-- Every significant contribution must be properly recorded in the **CHANGELOG**
-- Only after review approval + changelog update can the changes be merged into the `main` branch
-- Direct commits to `main` are **not allowed**
+* ✨ New features
+* 🧠 Architecture improvements
+* ⚡ Performance optimizations
+* 🔬 Research contributions
+* 📚 Major documentation improvements
+* 🏗️ Infrastructure enhancements
 
-This process ensures code quality, shared ownership, and healthy collaboration.
+### Option B • Maintenance Contributions
+
+Successfully contribute **15 or more maintenance Pull Requests**, including:
+
+* 🐛 Bug fixes
+* ♻️ Refactoring
+* 🔒 Security improvements
+* 🧪 Testing improvements
+* 📦 Dependency maintenance
+* 📝 Documentation updates
+
+> These numbers are **guidelines rather than guarantees**. Promotion is based on contribution quality, technical judgment, collaboration, and long-term involvement.
+
+---
+
+# 🏛️ Promotion Process
+
+Once a contributor has demonstrated sustained, high-quality work:
+
+1. Existing Core Contributors review the contributor's overall history.
+2. Technical quality, consistency, and collaboration are evaluated.
+3. A discussion is held among the Core Contributors.
+4. If approved, the contributor is invited to join the Core Team.
+
+Promotion is earned through trust, not automatically granted by reaching a contribution count.
+
+---
+
+# 🔑 Responsibilities & Permissions
+
+Core Contributors are trusted to help maintain Cerium Delta.
+
+They may:
+
+* ✅ Review Pull Requests
+* ✅ Approve Pull Requests
+* ✅ Merge approved Pull Requests
+* ✅ Participate in architectural discussions
+* ✅ Help define the project's roadmap
+* ✅ Work directly on the `dev` branch
+* ✅ Work directly on the `testing` branch
+* ✅ Mentor new contributors
+
+---
+
+# 📜 Core Contributor Rules
+
+Being a Core Contributor comes with additional responsibility.
+
+### Review Requirements
+
+* Every significant Pull Request should receive review from **at least two Core Contributors** before merging.
+* Contributors should avoid reviewing their own work whenever possible.
+
+### Branch Protection
+
+* Direct commits to the `main` branch are **strictly prohibited**.
+* Development occurs through feature branches, `dev`, and `testing`.
+
+### Documentation
+
+Significant changes should include:
+
+* CHANGELOG updates
+* Documentation updates
+* Migration notes (if applicable)
+
+### Code Quality
+
+Core Contributors are expected to:
+
+* Follow project coding standards
+* Maintain backward compatibility whenever practical
+* Prioritize readability and maintainability
+* Encourage constructive code reviews
+* Help new contributors succeed
+
+---
+
+# 🤝 Code Review Philosophy
+
+Reviews are intended to improve the project, not criticize contributors.
+
+Every review should be:
+
+* Respectful
+* Constructive
+* Evidence-based
+* Focused on improving code quality
+
+Healthy discussion is encouraged. Technical disagreements should always remain professional.
+
+---
+
+# 🚀 Core Values
+
+Core Contributors help preserve the principles that define Cerium Delta:
+
+* 🧠 Research-driven development
+* 🔍 Transparency
+* ⚡ Performance
+* 📚 Clear documentation
+* 🤝 Collaboration
+* 🌍 Open-source first
+
+These principles guide every decision made within the project.
