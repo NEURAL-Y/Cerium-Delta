@@ -1,6 +1,7 @@
 from scipy.stats import percentileofscore
 import numpy as np
 
+
 class NVS:
     """
     Neural Vitality System (NVS)
@@ -92,9 +93,9 @@ class NVS:
     # WEIGHT-BASED METRICS (unchanged)
     # ------------------------------------------------------------------
 
-    def compute_lcs(self)->dict:
+    def compute_lcs(self):
         """
-        Layer Contribution Score (LCS) : only valid for weights
+        Layer Contribution Score (LCS)
 
         Measures the contribution of each layer by amplifying its
         parameter values using an adaptive power derived from the
@@ -122,18 +123,18 @@ class NVS:
 
         for i,(k, v) in enumerate(x.items()):
 
-            # Apply adaptive power scaling.
+            powered = np.sign(v) * np.power(np.abs(v), self.layer_powers[i])
             self.lcs.update(
                 {
-                    k: v * (np.power(v, self.layer_powers[i]))
+                    k: v * powered
                 }
             )
 
         return self.lcs
 
-    def compute_sensitivity(self)->dict:
+    def compute_sensitivity(self):
         """
-        Sensitivity Score : only valid for weights
+        Sensitivity Score
 
         Estimates how responsive each layer is to parameter changes by
         combining the derivative of the LCS formulation with the layer
@@ -147,35 +148,36 @@ class NVS:
 
         x = self.model_state["weights"]
 
-        f = []
+        f = {}
 
         # Compute derivative of x^p.
         for i,(k, v) in enumerate(x.items()):
 
             if k != "layer 1":
-                f.append(
+                f[k] = (
                     self.layer_powers[i] *
-                    (np.power(v, self.layer_powers[i] - 1))
+                    (np.sign(v) * np.power(np.abs(v), self.layer_powers[i] - 1))
                 )
             else:
                 continue
 
+        for k, v in x.items():
 
-
-        for index,(k, v) in enumerate(x.items()):
+            if k not in f:
+                continue
 
             # L2 norm summarizes layer sensitivity into a scalar.
             self.sensitivity_score.update(
                 {
-                    k: np.linalg.norm(v * f[index])
+                    k: np.linalg.norm(v * f[k])
                 }
             )
 
         return self.sensitivity_score
 
-    def compute_evolution(self)->dict:
+    def compute_evolution(self):
         """
-        Evolution Score : only valid for weights
+        Evolution Score
 
         Measures how much each layer has changed throughout training.
 
@@ -200,7 +202,7 @@ class NVS:
 
         return self.evolution_scores
 
-    def threshold_lcs(self)->None:
+    def threshold_lcs(self):
         """
         Filter LCS values using coefficient of variation (CV).
 
@@ -250,7 +252,7 @@ class NVS:
 
         return None
 
-    def threshold_sens(self)->None:
+    def threshold_sens(self):
         """
         Convert sensitivity scores into percentile rankings.
 
@@ -276,13 +278,12 @@ class NVS:
 
         return None
 
-    def threshold_evolution(self)->None:
+    def threshold_evolution(self):
         """
         Convert evolution scores into percentile rankings.
-        
+
         Higher percentiles indicate layers that experienced greater
         parameter updates during training.
-        valid for weights only
         """
 
         rankings = {}
@@ -308,7 +309,7 @@ class NVS:
     # BIAS-BASED METRICS (mirrors weight logic exactly, "bias"/"bias_train")
     # ------------------------------------------------------------------
 
-    def compute_lcs_bias(self)->dict:
+    def compute_lcs_bias(self):
         """
         Layer Contribution Score (LCS) — bias variant.
 
@@ -367,15 +368,16 @@ class NVS:
         for i,(k, v) in enumerate(x.items()):
 
             # Apply adaptive power scaling.
+            powered = np.sign(v) * np.power(np.abs(v), self.layer_powers_bias[i])
             self.lcs_bias.update(
                 {
-                    k: v * (np.power(v, self.layer_powers_bias[i]))
+                    k: v * powered
                 }
             )
 
         return self.lcs_bias
 
-    def compute_sensitivity_bias(self)->dict:
+    def compute_sensitivity_bias(self):
         """
         Sensitivity Score — bias variant.
 
@@ -422,33 +424,37 @@ class NVS:
 
         x = self.model_state["bias"]
 
-        f = []
+        # Fix: dict keyed by layer name instead of positional list,
+        # same reasoning as compute_sensitivity.
+        f = {}
 
         # Compute derivative of x^p.
         for i,(k, v) in enumerate(x.items()):
 
             if k != "layer 1":
-                f.append(
+                f[k] = (
                     self.layer_powers_bias[i] *
-                    (np.power(v, self.layer_powers_bias[i] - 1))
+                    (np.sign(v) * np.power(np.abs(v), self.layer_powers_bias[i] - 1))
                 )
             else:
                 continue
 
+        for k, v in x.items():
 
-
-        for index,(k, v) in enumerate(x.items()):
+            # "layer 1" excluded consistently, same as compute_sensitivity.
+            if k not in f:
+                continue
 
             # L2 norm summarizes layer sensitivity into a scalar.
             self.sensitivity_score_bias.update(
                 {
-                    k: np.linalg.norm(v * f[index])
+                    k: np.linalg.norm(v * f[k])
                 }
             )
 
         return self.sensitivity_score_bias
 
-    def compute_evolution_bias(self)->dict:
+    def compute_evolution_bias(self):
         """
         Evolution Score — bias variant.
 
@@ -496,7 +502,7 @@ class NVS:
 
         return self.evolution_scores_bias
 
-    def threshold_lcs_bias(self)->None:
+    def threshold_lcs_bias(self):
         """
         Filter bias LCS values using coefficient of variation (CV).
 
@@ -571,7 +577,7 @@ class NVS:
 
         return None
 
-    def threshold_sens_bias(self)->None:
+    def threshold_sens_bias(self):
         """
         Convert bias sensitivity scores into percentile rankings.
 
@@ -615,7 +621,7 @@ class NVS:
 
         return None
 
-    def threshold_evolution_bias(self)->None:
+    def threshold_evolution_bias(self):
         """
         Convert bias evolution scores into percentile rankings.
 
