@@ -5,13 +5,22 @@
 # Beyond Visualization
 ![SAMPLE](./public/sample.png.png "sample image")<br>
 Cerium Delta is not a neural network drawing tool.
-
 Most architecture visualization tools generate static diagrams that describe how a model is constructed. While useful for documentation, they provide little insight into how a model behaves during training or inference.
 
 Cerium Delta focuses on **observability**, not visualization.
 
-The objective is to provide real-time insight into the internal dynamics of neural architectures, allowing researchers and developers to understand how information flows through a model as it learns.
-
+The objective is to provide real-time insight into the internal dynamics of neural architectures, allowing researchers and developers to understand how information flows through a model as it learns.<br>
+# Build stack
+![Python](https://img.shields.io/badge/python-3.11+-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Turtle](https://img.shields.io/badge/turtle-graphics-green?style=for-the-badge&logo=python&logoColor=white)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)
+![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)
+![SciPy](https://img.shields.io/badge/SciPy-%230C55A5.svg?style=for-the-badge&logo=scipy&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
+![JAX](https://img.shields.io/badge/JAX-222827?style=for-the-badge&logo=jax&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white)
+![joblib](https://img.shields.io/badge/joblib-blue?style=for-the-badge&logo=python&logoColor=white)
 ---
 
 # What We Observe
@@ -152,6 +161,34 @@ A central focus of Cerium Delta is the development of architecture-aware metrics
 - [ ] Distributed Training Support
 - [ ] Research Benchmark Suite
 ---
+### REPO_OVERVIEW
+```bash
+cerium-delta/
+├── src/
+│   └── cerium_delta/
+│       ├── __init__.py
+│       ├── dev.py
+│       ├── metrics/
+│       │   └── brain.py
+│       ├── exporters/
+│       │   ├── torch_converter.py
+│       │   ├── tensorflow_converter.py
+│       │   ├── jax_converter.py
+│       │   └── sklearn_converter.py
+│       └── visualization/
+│           └── viz.py
+│
+├── docs/
+│   ├── ARCHITECTURE.md
+│   └── Repo_Structure.md
+│
+├── tests/
+│
+├── README.md
+├── LICENSE
+├── pyproject.toml
+└── .gitignore
+```
 
 # Vision
 
