@@ -355,7 +355,7 @@ class NVS:
 
 
             sensitivity = np.linalg.norm(
-                jac_powered @ current_weight
+                np.outer(current_weight,jac_powered
             )
 
             self.sensitivity_score[layers[i]] = sensitivity
@@ -641,7 +641,7 @@ class NVS:
             )
 
             sensitivity = np.linalg.norm(
-                np.outer(jac_powered,current_bias)
+                np.outer(current_weight,jac_powered)
             )
 
             self.sensitivity_score_bias[layers[i]] = sensitivity
