@@ -2,123 +2,95 @@
 
 ### *The Operating System for Neural Network Intelligence*
 
-```
-                                        CERIUM DELTA
-                   ───────────────────────────────────────────────────
-
-              ┌────────────┐   ┌────────────┐   ┌────────────┐
-              │ TorchVis   │   │ TensorVis │   │   SKVis    │
-              └─────┬──────┘   └─────┬──────┘   └─────┬──────┘
-                    │                │                │
-                    └────────────────┼────────────────┘
-                                     │
-                                     ▼
-                     ╔════════════════════════════╗
-                     ║    UNIVERSAL MODEL BUS     ║
-                     ║    (Unified ONNX Graph)    ║
-                     ╚════════════════════════════╝
-                                     │
-                                     ▼
-╔══════════════════════════════════════════════════════════════════════╗
-║                        DEV ENGINE                                   ║
-║──────────────────────────────────────────────────────────────────────║
-║ ✓ Model Parsing                                                     ║
-║ ✓ Graph Normalization                                               ║
-║ ✓ Metadata Cleaning                                                 ║
-║ ✓ Error Detection                                                   ║
-║ ✓ Operator Validation                                               ║
-║ ✓ Framework Translation                                             ║
-║ ✓ Runtime Standardization                                           ║
-╚══════════════════════════════════════════════════════════════════════╝
-                                     │
-                                     ▼
-══════════════════════════ Neural Intelligence Layer ══════════════════
-                                     │
-                                     ▼
-╔══════════════════════════════════════════════════════════════════════╗
-║                         BRAIN CORE                                  ║
-║              Neuron Vitality System (NVS)                           ║
-║──────────────────────────────────────────────────────────────────────║
-║                                                                      ║
-║ • Neuron Contribution Scoring                                        ║
-║ • Layer Intelligence Mapping                                         ║
-║ • Weight Evolution                                                   ║
-║ • Gradient Flow Analysis                                             ║
-║ • Activation Dynamics                                                ║
-║ • Training Sensitivity Evolution                                     ║
-║ • Architecture Stability                                             ║
-║ • Information Propagation                                            ║
-║ • Bottleneck Detection                                               ║
-║ • Representation Collapse Detection                                 ║
-║ • Learning Efficiency                                                ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
-                                     │
-                                     ▼
-                     ╔════════════════════════════╗
-                     ║    VITALITY GATEWAY        ║
-                     ║ Dynamic Threshold Engine   ║
-                     ╚════════════════════════════╝
-                                     │
-             ┌───────────────────────┼────────────────────────┐
-             ▼                       ▼                        ▼
-      🟢 HEALTHY              🟡 WEAK                  🔴 DEAD
-      High Impact         Limited Learning        No Contribution
-             └───────────────────────┼────────────────────────┘
-                                     ▼
-╔══════════════════════════════════════════════════════════════════════╗
-║                       VISUALIZATION ENGINE                           ║
-║──────────────────────────────────────────────────────────────────────║
-║                                                                      ║
-║ 🌐 Interactive 3D Neural World                                       ║
-║ 📊 Layer Analytics Dashboard                                         ║
-║ 🔥 Activation Heatmaps                                               ║
-║ ⚡ Live Training Timeline                                            ║
-║ 📈 Weight Evolution                                                  ║
-║ 🧠 Neuron Health Monitor                                             ║
-║ 🎯 Contribution Score Explorer                                       ║
-║ 🌊 Gradient Flow Animation                                           ║
-║ 🎬 Dynamic Architecture Replay                                       ║
-║ 📄 Research Report Generator                                         ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
-                                     │
-                                     ▼
-                    ┌─────────────────────────────────┐
-                    │      Human Understanding        │
-                    │                                 │
-                    │  Explain • Explore • Improve    │
-                    └─────────────────────────────────┘
-```
-
+                         ┌─────────────────┐
+                         │   SURFACE / VIS │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │       DEV       │
+                         │    Middleman    │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                     ┌────────────────────────┐
+                     │   FRAMEWORK ROUTER     │
+                     └───────────┬────────────┘
+                                 │
+             ┌───────────────────┼───────────────────┐
+             │                   │                   │
+             │                   │                   │
+             ▼                   ▼                   ▼
+      ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+      │   PyTorch   │     │ TensorFlow  │     │     JAX     │
+      │  Converter  │     │  Converter  │     │  Converter  │
+      └──────┬──────┘     └──────┬──────┘     └──────┬──────┘
+             │                   │                   │
+             │                   │                   │
+             │            ┌──────▼──────┐            │
+             │            │   sklearn   │            │
+             │            │  Converter  │            │
+             │            └──────┬──────┘            │
+             │                   │                   │
+             └───────────────────┼───────────────────┘
+                                 │
+                                 ▼
+                        ┌─────────────────┐
+                        │      CDIR       │
+                        │  Standard Data  │
+                        └────────┬────────┘
+                                 │
+                                 ▼
+                        ┌─────────────────┐
+                        │       NVS       │
+                        │ Neural Vitality │
+                        │     System      │
+                        └────────┬────────┘
+                                 │
+                                 ▼
+                        ┌─────────────────┐
+                        │ NVS Result      │
+                        │    Schema       │
+                        └────────┬────────┘
+                                 │
+                                 ▼
+                        ┌─────────────────┐
+                        │       DEV       │
+                        └────────┬────────┘
+                                 │
+                                 ▼
+                        ┌─────────────────┐
+                        │   SURFACE / VIS │
+                        └─────────────────┘
 ---
 
 # Architecture Layers
 
 ```
-               User
-                 │
-                 ▼
-          Visualization Layer
-                 │
-                 ▼
-      Dynamic Threshold Engine
-                 │
-                 ▼
-      Brain Core (Neuron AI)
-                 │
-                 ▼
-         DEV Processing Layer
-                 │
-                 ▼
- Universal ONNX Representation
-                 │
-                 ▼
-Framework Extraction Layer
-                 │
- ┌───────────────┼────────────────┐
- ▼               ▼                ▼
-PyTorch      TensorFlow      Scikit-Learn
+             USER
+  ↓
+SURFACE / VIS
+  ↓
+DEV
+  ↓
+FRAMEWORK ROUTER
+  ↓
+┌──────────┬───────────┬──────────┬─────────┐
+PyTorch   TensorFlow   JAX      sklearn
+  ↓          ↓           ↓          ↓
+  └──────────┴───────────┴──────────┘
+                    ↓
+             CDIR / Standard Data
+                    ↓
+                   NVS
+                    ↓
+              NVS Result Schema
+                    ↓
+                   DEV
+                    ↓
+              SURFACE / VIS
+                    ↓
+                  USER
 ```
 
 ---
