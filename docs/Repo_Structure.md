@@ -8,33 +8,35 @@ From model extraction → intelligence → visualization
 ## Project Layout
 
 ```text
+
 cerium-delta/
 │
-├── .github/
-│   ├── CODEOWNERS
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   └── workflows/                  # CI/CD
-│
-├── public/
-│   └── Cerium-delta.png            # Project logo
-│
 ├── src/
-│   ├── torchvis/                   # PyTorch extractor
-│   ├── skvis/                      # scikit-learn extractor
-│   ├── tensorvis/                  # TensorFlow extractor
-│   ├── dev/                        # Data cleaning & filtering
-│   ├── brain/                      # Neuron Vitality System (NVS)
-│   └── visualizer/                 # 2D & 3D visualization engine
-│
-├── tests/                          # Test suite (planned)
+│   └── cerium_delta/
+│       │
+│       ├── __init__.py
+│       │
+│       ├── dev.py
+│       │
+│       ├── metrics/
+│       │   └── brain.py
+│       │
+│       ├── exporters/
+│       │   ├── torch_converter.py
+│       │   ├── tensorflow_converter.py
+│       │   ├── jax_converter.py
+│       │   └── sklearn_converter.py
+│       │
+│       └── visualization/
+│           └── viz.py
 │
 ├── docs/
-│   ├── architecture.md
-│   └── repo_structure.md
+│   ├── ARCHITECTURE.md
+│   └── Repo_Structure.md
 │
-├── CHANGELOG.md
-├── CODE_OF_CONDUCT.md
-├── CONTRIBUTING.md
-├── LICENSE
+├── tests/
+│
 ├── README.md
-└── pyproject.toml           #configuration(pip)
+├── LICENSE
+├── pyproject.toml
+└── .gitignore
