@@ -329,10 +329,10 @@ class NVS:
         layers = list(x.keys())
         for v in x.values():
             gram = v.T @ v
-            eig = np.sqrt(np.linalg.eigvals(gram))
+            eig = np.linalg.eigvalsh(gram)
 
             spectral = np.sqrt(
-                np.max(np.abs(eig))
+                np.sqrt(np.max(np.abs(eig)))
             )
 
             self.layer_powers.append(
@@ -355,7 +355,7 @@ class NVS:
 
 
             sensitivity = np.linalg.norm(
-                current_weight @ jac_powered
+                jac_powered @ current_weight
             )
 
             self.sensitivity_score[layers[i]] = sensitivity
@@ -616,9 +616,9 @@ class NVS:
             else:
                 gram = np.outer(v, v)
 
-            eig = np.linalg.eigvals(gram)
+            eig = np.linalg.eigvalsh(gram)
 
-            spectral = np.max(np.abs(eig))
+            spectral = np.sqrt(np.max(np.abs(eig)))
 
             self.layer_powers_bias.append(
                 np.log(spectral + 1e-12)
@@ -641,7 +641,7 @@ class NVS:
             )
 
             sensitivity = np.linalg.norm(
-                np.outer(current_bias, jac_powered)
+                np.outer(jac_powered,current_bias)
             )
 
             self.sensitivity_score_bias[layers[i]] = sensitivity
@@ -689,11 +689,14 @@ class NVS:
         for k in trained_bias:
 
             if k in reference_bias:
-
+               if epochs!=0:
                 self.evolution_scores_bias[k] = (
                     np.linalg.norm(trained_bias[k] - reference_bias[k]) / epochs
                 )
-
+               else:
+                   self.evolution_scores_bias[k] = (
+                                       np.linalg.norm(trained_bias[k] - reference_bias[k])
+                                   )
         return self.evolution_scores_bias
 
     def threshold_lcs_bias(self)->None:
