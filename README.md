@@ -11,18 +11,21 @@ Cerium Delta focuses on **observability**, not visualization.
 
 The objective is to provide real-time insight into the internal dynamics of neural architectures, allowing researchers and developers to understand how information flows through a model as it learns.<br>
 # Build stack
-![Python](https://img.shields.io/badge/python-3.11+-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![Turtle](https://img.shields.io/badge/turtle-graphics-green?style=for-the-badge&logo=python&logoColor=white)
-![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)
-![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)
-![SciPy](https://img.shields.io/badge/SciPy-%230C55A5.svg?style=for-the-badge&logo=scipy&logoColor=white)
-![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
-![JAX](https://img.shields.io/badge/JAX-222827?style=for-the-badge&logo=jax&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white)
-![joblib](https://img.shields.io/badge/joblib-blue?style=for-the-badge&logo=python&logoColor=white)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![turtle](https://img.shields.io/badge/turtle-Python%20Stdlib-blue?style=for-the-badge&logo=python&logoColor=white)](https://docs.python.org/3/library/turtle.html)
+[![Matplotlib](https://img.shields.io/badge/Matplotlib-visualizations-blue?style=for-the-badge&logo=python&logoColor=white)](https://matplotlib.org/)
+[![JAX](https://img.shields.io/badge/JAX-autograd%20%26%20XLA-orange?style=for-the-badge&logo=python&logoColor=white)](https://jax.readthedocs.io/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-deep%20learning-ee4c2c?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-deep%20learning-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
+[![NumPy](https://img.shields.io/badge/NumPy-numerical%20computing-013243?style=for-the-badge&logo=numpy&logoColor=white)](https://numpy.org/)
+[![joblib](https://img.shields.io/badge/joblib-parallel%20computing-yellowgreen?style=for-the-badge&logo=python&logoColor=white)](https://joblib.readthedocs.io/)
+[![SciPy](https://img.shields.io/badge/SciPy-scientific%20computing-8CAAE6?style=for-the-badge&logo=scipy&logoColor=white)](https://scipy.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-machine%20learning-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
 ---
-
+# Other Configure
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Pre-release](https://img.shields.io/badge/pre--release-v1.0.0-orange)
+![Beta Testing](https://img.shields.io/badge/Beta%20testing-yellow)
 # What We Observe
 
 Cerium Delta aims to monitor the internal state of neural architectures in real time.
