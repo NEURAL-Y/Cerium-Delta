@@ -26,6 +26,7 @@ The objective is to provide real-time insight into the internal dynamics of neur
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/NEURAL-Y/cerium-delta/blob/main/LICENSE)
 ![Pre-release](https://img.shields.io/badge/pre--release-v1.0.0-orange)
 ![Beta Testing](https://img.shields.io/badge/Beta%20testing-yellow)
+[![status](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-shimmer.svg)](https://cerium-delta.pages.dev).
 # What We Observe
 
 Cerium Delta aims to monitor the internal state of neural architectures in real time.
