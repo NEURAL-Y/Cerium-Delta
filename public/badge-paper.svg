@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170" height="28" viewBox="0 0 170 28">
+  <defs>
+    <linearGradient id="shimmer2" x1="0%" y1="0%" x2="200%" y2="0%">
+      <stop offset="0%" stop-color="#2d1b4e"/>
+      <stop offset="45%" stop-color="#e0aaff"/>
+      <stop offset="55%" stop-color="#e0aaff"/>
+      <stop offset="100%" stop-color="#2d1b4e"/>
+      <animate attributeName="x1" values="-100%;100%" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="x2" values="100%;300%" dur="2.5s" repeatCount="indefinite"/>
+    </linearGradient>
+  </defs>
+  <rect width="170" height="28" rx="6" fill="#2d1b4e" stroke="#7b2ff7"/>
+  <text x="85" y="19" font-family="Verdana, sans-serif" font-size="12" font-weight="bold"
+        text-anchor="middle" fill="url(#shimmer2)">arXiv: NVB Paper</text>
+</svg>
