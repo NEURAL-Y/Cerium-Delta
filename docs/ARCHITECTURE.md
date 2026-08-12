@@ -1,67 +1,7 @@
 # ⚡ Cerium Delta Architecture
 
 ### *The Operating System for Neural Network Intelligence*
-
-                         ┌─────────────────┐
-                         │   SURFACE / VIS │
-                         └────────┬────────┘
-                                  │
-                                  ▼
-                         ┌─────────────────┐
-                         │       DEV       │
-                         │    Middleman    │
-                         └────────┬────────┘
-                                  │
-                                  ▼
-                     ┌────────────────────────┐
-                     │   FRAMEWORK ROUTER     │
-                     └───────────┬────────────┘
-                                 │
-             ┌───────────────────┼───────────────────┐
-             │                   │                   │
-             │                   │                   │
-             ▼                   ▼                   ▼
-      ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-      │   PyTorch   │     │ TensorFlow  │     │     JAX     │
-      │  Converter  │     │  Converter  │     │  Converter  │
-      └──────┬──────┘     └──────┬──────┘     └──────┬──────┘
-             │                   │                   │
-             │                   │                   │
-             │            ┌──────▼──────┐            │
-             │            │   sklearn   │            │
-             │            │  Converter  │            │
-             │            └──────┬──────┘            │
-             │                   │                   │
-             └───────────────────┼───────────────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │      CDIR       │
-                        │  Standard Data  │
-                        └────────┬────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │       NVS       │
-                        │ Neural Vitality │
-                        │     System      │
-                        └────────┬────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │ NVS Result      │
-                        │    Schema       │
-                        └────────┬────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │       DEV       │
-                        └────────┬────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │   SURFACE / VIS │
-                        └─────────────────┘
+<img src="https://github.com/NEURAL-Y/cerium-delta/blob/main/public/dev_hub_network.svg" />
 ---
 
 # Architecture Layers
