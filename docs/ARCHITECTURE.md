@@ -65,34 +65,27 @@
 ---
 
 # Architecture Layers
-
 ```
-             USER
-  ↓
-SURFACE / VIS
-  ↓
-DEV
-  ↓
-FRAMEWORK ROUTER
-  ↓
-┌──────────┬───────────┬──────────┬─────────┐
-PyTorch   TensorFlow   JAX      sklearn
-  ↓          ↓           ↓          ↓
-  └──────────┴───────────┴──────────┘
-                    ↓
-             CDIR / Standard Data
-                    ↓
-                   NVS
-                    ↓
-              NVS Result Schema
-                    ↓
-                   DEV
-                    ↓
-              SURFACE / VIS
-                    ↓
-                  USER
+                        ┏━━━━━━━━━━━━━┓
+                        ┃     DEV     ┃
+        ┌──────────────▶┃  · CDIR ·   ┃◀──────────────┐
+        │               ┗━━━┳━━━━━━━┳━┛                │
+        │                   │       │                  │
+        │                   ▼       ▼                  │
+        │           ┌───────────┐ ┌─────┐               │
+┌───────┴────────┐   │  FRAMEWORK│ │ NVS │        ┌──────┴───────┐
+│  SURFACE / VIS  │   │  ROUTER   │ └──┬──┘        │ NVS RESULT   │
+└─────────────────┘   └─────┬─────┘    │           │   SCHEMA     │
+                             │          ▼           └──────────────┘
+              ┌──────┬───────┼───────┬──────┐
+              │       │       │       │
+          ┌───▼──┐┌───▼────┐┌─▼──┐┌───▼────┐
+          │PyTorch││TensorFl││JAX ││sklearn │
+          │      ││ow      ││    ││        │
+          └──────┘└────────┘└────┘└────────┘
 ```
-
+  converters → FRAMEWORK ROUTER (user's chosen framework selected here)
+  → DEV → CDIR structures data → NVS → NVS RESULT SCHEMA → DEV → SURFACE/VIS
 ---
 
 # Core Philosophy
