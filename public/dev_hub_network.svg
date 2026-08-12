@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 800" font-family="Menlo, Consolas, 'Courier New', monospace">
+
+  <!-- background -->
+  <rect x="0" y="0" width="950" height="800" fill="#08090a"/>
+
+  <!-- title -->
+  <text x="475" y="34" text-anchor="middle" fill="#5a6864" font-size="12" letter-spacing="2">DEV — CENTRAL ROUTER  ·  NEURAL-Y / cerium-delta</text>
+
+  <!-- ================= LINKS (DEV primary spokes) ================= -->
+  <g stroke="#3a4340" stroke-width="1.4" fill="none">
+    <line x1="520" y1="400" x2="520" y2="97"  stroke-dasharray="6 5"><animate attributeName="stroke-dashoffset" from="0" to="-44" dur="2.2s" repeatCount="indefinite"/></line>
+    <line x1="520" y1="400" x2="330" y2="400" stroke-dasharray="6 5"><animate attributeName="stroke-dashoffset" from="0" to="-44" dur="2.2s" repeatCount="indefinite"/></line>
+    <line x1="520" y1="400" x2="870" y2="400" stroke-dasharray="6 5"><animate attributeName="stroke-dashoffset" from="0" to="-44" dur="2.2s" repeatCount="indefinite"/></line>
+    <line x1="520" y1="400" x2="520" y2="720" stroke-dasharray="6 5"><animate attributeName="stroke-dashoffset" from="0" to="-44" dur="2.2s" repeatCount="indefinite"/></line>
+  </g>
+
+  <!-- ================= LINKS (FRAMEWORK ROUTER <- converters) ================= -->
+  <g stroke="#2c3330" stroke-width="1" fill="none">
+    <line x1="255" y1="400" x2="150" y2="220" stroke-dasharray="4 4"><animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.8s" repeatCount="indefinite"/></line>
+    <line x1="255" y1="400" x2="150" y2="330" stroke-dasharray="4 4"><animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.8s" repeatCount="indefinite"/></line>
+    <line x1="255" y1="400" x2="150" y2="470" stroke-dasharray="4 4"><animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.8s" repeatCount="indefinite"/></line>
+    <line x1="255" y1="400" x2="150" y2="580" stroke-dasharray="4 4"><animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.8s" repeatCount="indefinite"/></line>
+  </g>
+
+  <!-- ================= PULSES: DEV <-> primary nodes (bidirectional) ================= -->
+  <g fill="#eef5f0">
+    <circle r="3.2"><animateMotion dur="2.6s" begin="0s"   repeatCount="indefinite" path="M520,400 L520,97"/></circle>
+    <circle r="3.2"><animateMotion dur="2.6s" begin="1.3s" repeatCount="indefinite" path="M520,97 L520,400"/></circle>
+
+    <circle r="3.2"><animateMotion dur="2.8s" begin="0.4s" repeatCount="indefinite" path="M520,400 L330,400"/></circle>
+    <circle r="3.2"><animateMotion dur="2.8s" begin="1.8s" repeatCount="indefinite" path="M330,400 L520,400"/></circle>
+
+    <circle r="3.2"><animateMotion dur="3.0s" begin="0.8s" repeatCount="indefinite" path="M520,400 L870,400"/></circle>
+    <circle r="3.2"><animateMotion dur="3.0s" begin="2.3s" repeatCount="indefinite" path="M870,400 L520,400"/></circle>
+
+    <circle r="3.2"><animateMotion dur="2.4s" begin="1.1s" repeatCount="indefinite" path="M520,400 L520,720"/></circle>
+    <circle r="3.2"><animateMotion dur="2.4s" begin="2.3s" repeatCount="indefinite" path="M520,720 L520,400"/></circle>
+  </g>
+
+  <!-- ================= PULSES: converters -> FRAMEWORK ROUTER (one-way) ================= -->
+  <g fill="#c9d6d0">
+    <circle r="2.4"><animateMotion dur="1.9s" begin="0.1s" repeatCount="indefinite" path="M150,220 L255,400"/></circle>
+    <circle r="2.4"><animateMotion dur="1.9s" begin="0.6s" repeatCount="indefinite" path="M150,330 L255,400"/></circle>
+    <circle r="2.4"><animateMotion dur="1.9s" begin="1.1s" repeatCount="indefinite" path="M150,470 L255,400"/></circle>
+    <circle r="2.4"><animateMotion dur="1.9s" begin="1.6s" repeatCount="indefinite" path="M150,580 L255,400"/></circle>
+  </g>
+
+  <!-- ================= PRIMARY NODES ================= -->
+  <!-- SURFACE / VIS -->
+  <g>
+    <rect x="455" y="80" width="130" height="34" fill="#08090a" stroke="#c9d6d0" stroke-width="1.2"/>
+    <text x="520" y="101" text-anchor="middle" fill="#c9d6d0" font-size="13">SURFACE / VIS</text>
+  </g>
+
+  <!-- FRAMEWORK ROUTER -->
+  <g>
+    <rect x="255" y="383" width="150" height="34" fill="#08090a" stroke="#c9d6d0" stroke-width="1.2"/>
+    <text x="330" y="404" text-anchor="middle" fill="#c9d6d0" font-size="12.5">FRAMEWORK ROUTER</text>
+  </g>
+
+  <!-- NVS -->
+  <g>
+    <rect x="835" y="383" width="70" height="34" fill="#08090a" stroke="#c9d6d0" stroke-width="1.2"/>
+    <text x="870" y="404" text-anchor="middle" fill="#c9d6d0" font-size="13">NVS</text>
+  </g>
+
+  <!-- NVS RESULT SCHEMA -->
+  <g>
+    <rect x="440" y="703" width="160" height="34" fill="#08090a" stroke="#c9d6d0" stroke-width="1.2"/>
+    <text x="520" y="724" text-anchor="middle" fill="#c9d6d0" font-size="12.5">NVS RESULT SCHEMA</text>
+  </g>
+
+  <!-- ================= SECONDARY NODES (converters, feed the router) ================= -->
+  <g fill="#08090a" stroke="#5a6864" stroke-width="1">
+    <rect x="40" y="204" width="110" height="32"/>
+    <rect x="40" y="314" width="110" height="32"/>
+    <rect x="40" y="454" width="110" height="32"/>
+    <rect x="40" y="564" width="110" height="32"/>
+  </g>
+  <g fill="#8a958f" font-size="11.5" text-anchor="middle">
+    <text x="95" y="224">PyTorch</text>
+    <text x="95" y="334">TensorFlow</text>
+    <text x="95" y="474">JAX</text>
+    <text x="95" y="584">sklearn</text>
+  </g>
+
+  <!-- ================= DEV (central hub) ================= -->
+  <g>
+    <rect x="450" y="368" width="140" height="64" fill="#08090a" stroke="#eef5f0" stroke-width="2.2">
+      <animate attributeName="stroke-opacity" values="0.55;1;0.55" dur="2.8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="457" y="375" width="126" height="50" fill="none" stroke="#eef5f0" stroke-width="1">
+      <animate attributeName="stroke-opacity" values="0.35;0.8;0.35" dur="2.8s" repeatCount="indefinite"/>
+    </rect>
+    <text x="520" y="395" text-anchor="middle" fill="#eef5f0" font-size="15" font-weight="700">DEV</text>
+    <text x="520" y="411" text-anchor="middle" fill="#8a958f" font-size="10" letter-spacing="1">· CDIR ·</text>
+  </g>
+
+  <!-- caption -->
+  <text x="475" y="775" text-anchor="middle" fill="#5a6864" font-size="10.5">
+    converters feed FRAMEWORK ROUTER (user's framework selected here) → DEV → CDIR structures data → NVS → schema → back through DEV to SURFACE/VIS
+  </text>
+
+</svg>
