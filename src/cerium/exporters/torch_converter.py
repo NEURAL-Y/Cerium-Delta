@@ -17,7 +17,7 @@ class converter_pytorch:
       ----- 
       Model parameters and optimizer state are intentionally stored separately because they represent different aspects of training. Model parameters describe the learned state of the neural network, while optimizer state may contain quantities such as momentum, exponential moving averages, variance estimates, and optimization steps.
     """
-    def __init__(self,model,epoch,device="cpu",optimizer=None,save_model="None")->None:
+    def __init__(self,model,epoch,device="cpu",optimizer=None,save_model=None)->None:
 
         self.model=model
         self.optimizer=optimizer
@@ -30,7 +30,7 @@ class converter_pytorch:
          Returns
          ------- 
          dict Dictionary containing the extracted information. """
-       self.culter={"architecture_parameters":{},"trained_parameters":{},"total_layer":0,"total_epochs":0}
+       self.culter={"architecture_parameters":{},"training_parameters":{},"total_layer":0,"total_epochs":0}
 
        i=0
 
@@ -45,15 +45,13 @@ class converter_pytorch:
        else:
           self.culter["optimizer"]=None
 
-       if self.save_model !="None":
-          
+       if self.save_model is not None:
+          self.save_model=str(self.save_model)
           state=torch.load(self.save_model,map_location=self.device)
 
           for k,v in state.items():
              self.culter["trained_parameters"][k]=v.detach().cpu().numpy().copy()
-             
+       else:
+          self.save_model=None
+          
        return self.culter
-
-    
-    
-    
