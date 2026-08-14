@@ -10,7 +10,7 @@ class converter_sklearn:
             Attributes 
             ---------- 
             model Stores the scikit-learn MLP model. save_model Stores the path to the saved model or parameter file."""
-    def __init__(self,model,save_model="None")->None:
+    def __init__(self,model,save_model=None)->None:
         self.model=model
         self.save_model=save_model
     def extractor_architecture(self)->dict:
@@ -27,13 +27,13 @@ class converter_sklearn:
         self.culter={"architecture_parameters":{},"training_parameters":{},"total_layer":0,"total_steps":0}
         for i,weight in enumerate(self.model.coefs_):
 
-            self.culter["architecture_parameters"][f"layer {i} weights"]=weight.copy()
-
+            self.culter["architecture_parameters"][f"layer {i} weight"]=weight.copy()
+ 
         index=0
 
         for i,bias in enumerate(self.model.intercepts_):
 
-            self.culter["architecture_parameters"][f"layer {i} biases"]=bias.copy()
+            self.culter["architecture_parameters"][f"layer {i} bias"]=bias.copy()
 
             index+=1
 
@@ -41,8 +41,8 @@ class converter_sklearn:
 
         self.culter["total_steps"]=self.model.n_iter_
 
-        if self.save_model!="None":
-
+        if self.save_model is not None:
+            self.save_model=str(self.save_model)
             weights=joblib.load(self.save_model)
 
             if isinstance(weights,dict):
@@ -56,5 +56,7 @@ class converter_sklearn:
                     self.culter["training_parameters"][f"layer {i} weights"] = numpy.asarray(weight).copy()
             else:
                 raise RuntimeError("save_model_standard_error : you use wrong standard to save your model weights and biases it should be in a list or a dictionary type learn more about--> https://cerium-delta.pages.dev ")
-
+        else:
+            self.save_model=None
+            
         return self.culter

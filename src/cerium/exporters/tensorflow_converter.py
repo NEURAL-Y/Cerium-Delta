@@ -12,7 +12,7 @@ class converter_tensorflow:
     ---------- 
     model Stores the TensorFlow/Keras model. optimizer Stores the optimizer associated with the model. epoch Stores the number of completed training epochs. save_model Stores the path of the saved trained model. device Stores the device configuration.
     """
-    def __init__(self,model,epoch,optimizer=None,save_model="None",device="cpu")->None:
+    def __init__(self,model,epoch,optimizer=None,save_model=None,device="cpu")->None:
         self.model=model
         self.optimizer=optimizer
         self.save_model=save_model
@@ -26,19 +26,19 @@ class converter_tensorflow:
         ------- 
         dict A dictionary containing the extracted model information. ``architecture_parameters`` Stores the current model variables as independent NumPy arrays. These include trainable parameters such as kernels and biases. ``training_parameters`` Stores the variables extracted from the optional saved trained model. ``total_layer`` Stores the number of model variables extracted. ``total_epoch`` Stores the number of training epochs. ``optimizer`` Stores the optimizer variables as independent NumPy arrays.
         """
-        self.culter={"architecture_parameters":{},"training_parameters":{},"total_layer":0,"total_epoch":0,"optimizer":{}}
+        self.culter={"architecture_parameters":{},"training_parameters":{},"total_layer":0,"total_epochs":0,"optimizer":{}}
 
         index=0
 
-        for i in self.model.variable_name:
+        for i in self.model.variables:
 
-            self.culter["architecture_parameters"][i.name]=i.value.numpy().copy()
+            self.culter["architecture_parameters"][f"{i.name}_{i.path if hasattr(i,'path') else id(i)}"] = i.numpy().copy()
 
             index+=1
 
         self.culter["total_layer"]=index
 
-        self.culter["total_epoch"]=self.epoch
+        self.culter["total_epochs"]=self.epoch
         if self.optimizer is not None:
 
             for i in self.optimizer.variables:
@@ -46,12 +46,14 @@ class converter_tensorflow:
                 self.culter["optimizer"][i.name]=i.numpy().copy()
         else:
             self.culter["optimizer"]=None
-        if self.save_model!="None":
+        if self.save_model is not None:
+            self.save_model=str(self.save_model)
+            trained_params=tf.keras.models.load_model(self.save_model)
 
-            trained_params=tf.keras.models.load(self.save_model)
+            for var in trained_params.variables:
 
-            for var in trained_params:
-
-                self.culter["training_parameters"][var.name]=var.value.numpy().copy()
+                self.culter["training_parameters"][var.name]=var.numpy().copy()
+        else:
+            self.save_model=None
 
         return self.culter

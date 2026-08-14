@@ -10,7 +10,7 @@ class converter_jax:
         model,
         optimizer=None,
         epoch=0,
-        save_model="None"
+        save_model=None
     ) -> None:
         """
         Initialize the JAX model converter.
@@ -38,26 +38,59 @@ class converter_jax:
 
             The converter expects the saved data to follow the standard
             format defined by the Cerium Delta website.
-
-        Attributes
-        ----------
-        model
-            Stores the JAX model parameter PyTree.
-
-        optimizer
-            Stores the JAX optimizer state PyTree.
-
-        epoch
-            Stores the number of completed training epochs.
-
-        save_model
-            Stores the path to the saved model or parameter file.
         """
 
         self.model = model
         self.optimizer = optimizer
         self.epoch = epoch
         self.save_model = save_model
+
+    @staticmethod
+    def _flatten_named_tree(tree):
+        flat = {}
+        leaves = jax.tree_util.tree_flatten_with_path(tree)[0]
+
+        for path, value in leaves:
+            name_parts = []
+            for part in path:
+                if hasattr(part, "key"):
+                    name_parts.append(str(part.key))
+                elif hasattr(part, "idx"):
+                    name_parts.append(str(part.idx))
+                else:
+                    name_parts.append(str(part))
+
+            name = ".".join(part for part in name_parts if part not in {"", "None"})
+            if not name:
+                name = "root"
+            flat[name] = np.asarray(value).copy()
+        return flat
+
+    @staticmethod
+    def _flatten_saved_model(data):
+        if isinstance(data, dict):
+            flattened = {}
+            for key, value in data.items():
+                if isinstance(value, (dict, list, tuple)):
+                    nested = converter_jax._flatten_saved_model(value)
+                    for nested_key, nested_value in nested.items():
+                        flattened[f"{key}.{nested_key}" if nested_key != "root" else key] = nested_value
+                else:
+                    flattened[key] = np.asarray(value).copy()
+            return flattened
+
+        if isinstance(data, (list, tuple)):
+            flattened = {}
+            for index, value in enumerate(data):
+                if isinstance(value, (dict, list, tuple)):
+                    nested = converter_jax._flatten_saved_model(value)
+                    for nested_key, nested_value in nested.items():
+                        flattened[f"layer {index}.{nested_key}"] = nested_value
+                else:
+                    flattened[f"layer {index}"] = np.asarray(value).copy()
+            return flattened
+
+        return {"root": np.asarray(data).copy()}
 
     def extractor_architecture(self) -> dict:
         """
@@ -68,74 +101,33 @@ class converter_jax:
         -------
         dict
             Dictionary containing the extracted JAX model information.
-
-            ``architecture_parameters``
-                Contains model parameters extracted from the JAX PyTree.
-                Each JAX array is converted into an independent NumPy
-                array.
-
-            ``training_parameters``
-                Contains parameters loaded from the saved model file
-                according to the standard Cerium Delta format.
-
-            ``optimizer``
-                Contains optimizer state extracted from the optimizer
-                PyTree and converted into NumPy arrays.
-
-            ``total_layer``
-                Number of parameter arrays contained in the model PyTree.
-
-            ``total_epoch``
-                Number of training epochs supplied to the converter.
         """
 
+        architecture_parameters = self._flatten_named_tree(self.model)
+        optimizer_state = self._flatten_named_tree(self.optimizer) if self.optimizer is not None else {}
+
         self.culter = {
-            "architecture_parameters": {},
+            "architecture_parameters": architecture_parameters,
+            "trained_parameters": {},
             "training_parameters": {},
-            "optimizer": {},
-            "total_layer": 0,
-            "total_epoch": self.epoch
+            "optimizer": optimizer_state,
+            "total_layer": len(architecture_parameters),
+            "total_epochs": self.epoch,
         }
 
-        # Extract model parameters
-        model_parameters = jax.tree_util.tree_leaves(self.model)
-
-        for index, parameter in enumerate(model_parameters):
-
-            self.culter["architecture_parameters"][
-                f"parameter_{index}"
-            ] = np.asarray(parameter).copy()
-
-        self.culter["total_layer"] = len(model_parameters)
-
-        # Extract optimizer state
-        if self.optimizer is not None:
-
-            optimizer_parameters = jax.tree_util.tree_leaves(
-                self.optimizer
-            )
-
-            for index, parameter in enumerate(optimizer_parameters):
-
-                self.culter["optimizer"][
-                    f"state_{index}"
-                ] = np.asarray(parameter).copy()
-
-        # Extract saved trained parameters
-        if self.save_model != "None":
-
+        if self.save_model is not None:
+            self.save_model=str(self.save_model)
             trained_parameters = joblib.load(self.save_model)
 
-            if isinstance(trained_parameters, dict):
-
-                for key, value in trained_parameters.items():
-                    self.culter["training_parameters"][key] = (
-                        np.asarray(value).copy()
-                    )
-
-            elif isinstance(trained_parameters,list):
-                            for i, weight in enumerate(trained_parameters):
-                                self.culter["training_parameters"][f"layer {i} weights"] = np.asarray(weight).copy()
+            if isinstance(trained_parameters, (dict, list, tuple)):
+                flattened = self._flatten_saved_model(trained_parameters)
+                self.culter["trained_parameters"] = flattened
+                self.culter["training_parameters"] = flattened
             else:
-                            raise RuntimeError("save_model_standard_error : you use wrong standard to save your model weights and biases it should be in a list or a dictionary type learn more about--> https://cerium-delta.pages.dev ")
+                raise RuntimeError(
+                    "save_model_standard_error : you use wrong standard to save your model weights and biases it should be in a list or a dictionary type learn more about--> https://cerium-delta.pages.dev "
+                )
+        else:
+            self.save_model=None
+            
         return self.culter
