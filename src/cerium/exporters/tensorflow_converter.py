@@ -46,14 +46,25 @@ class converter_tensorflow:
                 self.culter["optimizer"][i.name]=i.numpy().copy()
         else:
             self.culter["optimizer"]=None
-        if self.save_model is not None:
-            self.save_model=str(self.save_model)
-            trained_params=tf.keras.models.load_model(self.save_model)
 
-            for var in trained_params.variables:
+        if self.save_model is not None:
+
+            if tf.config.list_physical_devices(self.device):
+               device="/GPU:0"
+            else:
+                device = "/CPU:0"
+
+            self.save_model=str(self.save_model)
+
+            with tf.device(device):
+
+                model = tf.keras.models.load_model(self.save_model)
+
+            for var in model.variables:
 
                 self.culter["training_parameters"][var.name]=var.numpy().copy()
         else:
+            
             self.save_model=None
 
         return self.culter
