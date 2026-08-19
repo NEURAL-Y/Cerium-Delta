@@ -249,11 +249,11 @@ This makes neural analysis more like a measurement system than a single score.
 
 ---
 
-# Neural Vitality Benchmark
+# Neuron Vitality Benchmark
 
 Cerium Delta also aims toward a broader benchmarking system for evaluating neural architectures.
 
-The **Neural Vitality Benchmark (NVB)** is intended to provide a standardized environment for comparing internal neural behavior across models and architectures.
+The **Neuron Vitality Benchmark (NVB)** is intended to provide a standardized environment for comparing internal neural behavior across models and architectures.
 
 Rather than comparing models only through:
 
@@ -590,30 +590,6 @@ This separation is important because visualization is only one possible consumer
 * [ ] Architecture Comparison Engine
 * [ ] Distributed Training Support
 * [ ] Research Visualization
-
----
-
-# Build Stack
-
-
-
-
-
-
-
-
-
-\
-
----
-
-# Other Configuration
-
-
-
-
-
-\
 
 ---
 
