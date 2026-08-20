@@ -6,9 +6,9 @@
 ---
 
 **Document ID:** CD-DC-001
-**Version:** 1.2
+**Version:** 1.0.0
 **Status:** Active
-**Date:** 20 August 2026
+**Date:** 21 August 2026
 **Author / Project Lead:** @neural-y
 
 ---
@@ -496,7 +496,7 @@ development progress. Substantive revisions are logged in Section 13.
 **Name:** @neural-y
 **Role:** Founder & Project Lead
 **Electronic Signature:** **/s/ @neural-y**
-**Date:** 19 August 2026
+**Date:** 20 August 2026
 
 ---
 
@@ -511,7 +511,7 @@ development progress. Substantive revisions are logged in Section 13.
 ---
 
 **Document ID:** CD-DC-001
-**Version:** 1.2
+**Version:** 1.0.0
 **Status:** Active
 **Author:** @neural-y
 
