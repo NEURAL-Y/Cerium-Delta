@@ -1,0 +1,34 @@
+<svg width="100%" viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Cerium Delta development charter badge</title>
+<desc>Shields.io style badge reading Cerium Delta / Development charter, transparent background, continuously pulsing neon glow with flicker on the right segment</desc>
+<defs>
+<linearGradient id="shine3" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity="0.15"/>
+<stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<filter id="neonGlow3" x="-120%" y="-180%" width="340%" height="460%">
+<feGaussianBlur stdDeviation="4" result="blur">
+<animate attributeName="stdDeviation" values="3;5.5;3;3;1;3.5;3" keyTimes="0;0.3;0.5;0.68;0.72;0.76;1" dur="2.2s" repeatCount="indefinite"/>
+</feGaussianBlur>
+<feMerge>
+<feMergeNode in="blur"/>
+<feMergeNode in="blur"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+</filter>
+</defs>
+<g transform="translate(20,30)">
+<rect x="0" y="0" width="108" height="30" rx="5" fill="#1a1a1f"/>
+<rect x="103" y="0" width="147" height="30" rx="5" fill="#111114" stroke="#534ab7" stroke-width="1">
+<animate attributeName="stroke-opacity" values="0.6;1;0.6;0.6;0.15;0.7;0.6" keyTimes="0;0.3;0.5;0.68;0.72;0.76;1" dur="2.2s" repeatCount="indefinite"/>
+</rect>
+<rect x="0" y="0" width="250" height="15" rx="5" fill="url(#shine3)"/>
+<text x="54" y="20" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" fill="#c9c7f0">cerium delta</text>
+<g filter="url(#neonGlow3)">
+<text x="176" y="20" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" font-weight="bold" fill="#a89dff">development charter
+<animate attributeName="opacity" values="0.75;1;0.75;0.75;0.25;0.85;0.75" keyTimes="0;0.3;0.5;0.68;0.72;0.76;1" dur="2.2s" repeatCount="indefinite"/>
+<animate attributeName="fill" values="#a89dff;#c7bfff;#a89dff;#a89dff;#635a99;#b3a9ff;#a89dff" keyTimes="0;0.3;0.5;0.68;0.72;0.76;1" dur="2.2s" repeatCount="indefinite"/>
+</text>
+</g>
+</g>
+</svg>
