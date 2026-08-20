@@ -1,0 +1,32 @@
+<svg width="100%" viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg" role="img">
+<title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:anthropic-sans, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Cerium Delta development charter badge</title>
+<desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:anthropic-sans, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Shields.io style badge reading Cerium Delta / Development charter, transparent background, flickering neon glow on the right segment</desc>
+<defs>
+<linearGradient id="shine3" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity="0.15"/>
+<stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<filter id="neonGlow2" x="-100%" y="-150%" width="300%" height="400%">
+<feGaussianBlur stdDeviation="3.5" result="blur"/>
+<feMerge>
+<feMergeNode in="blur"/>
+<feMergeNode in="blur"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+</filter>
+</defs>
+<g transform="translate(20,30)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:anthropic-sans, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="0" y="0" width="108" height="30" rx="5" fill="#1a1a1f" style="fill:rgb(26, 26, 31);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:anthropic-sans, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<rect x="103" y="0" width="147" height="30" rx="5" fill="#111114" stroke="#534ab7" stroke-width="1" style="fill:rgb(17, 17, 20);stroke:rgb(83, 74, 183);color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:anthropic-sans, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+
+</rect>
+<rect x="0" y="0" width="250" height="15" rx="5" fill="url(#shine3)" style="stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:anthropic-sans, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="54" y="20" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" fill="#c9c7f0" style="fill:rgb(201, 199, 240);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Verdana, sans-serif;font-size:13px;font-weight:400;text-anchor:middle;dominant-baseline:auto">cerium delta</text>
+<g filter="url(#neonGlow2)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:anthropic-sans, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<text x="176" y="20" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" font-weight="bold" fill="#a89dff" style="fill:rgb(168, 157, 255);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Verdana, sans-serif;font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:auto">development charter
+
+
+</text>
+</g>
+</g>
+</svg>
