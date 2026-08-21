@@ -194,18 +194,12 @@ class bridge:
         nvs=NVS(self.nvs_mem)
 
         try:
-
-            if self.compute_choice!="all":
-               self.nvs_result=nvs.compute(self.compute_choice)
-               return self.nvs_result
-
-            else:
-
-                self.evolve_score_bias,self.sens_score_bias,self.lcs_bias,self.lcs_weight,self.sens_score_weight,self.evolve_score_weight=nvs.compute(self.compute_choice) #type:ignore
-                return (self.lcs_weight,self.lcs_bias,self.sens_score_weight,self.sens_score_bias,self.evolve_score_weight,self.evolve_score_bias)
             
+            self.nvs_result=nvs.compute(self.compute_choice)
+            return self.nvs_result
+
         except Exception as e:
-           raise ReferenceError(f"File_error : there is something which struck the operations {e} \n report us on --> https://cerium-delta.pages.dev")
+           raise RuntimeError(f"File_error : there is something which struck the operations {e} \n report us on --> https://cerium-delta.pages.dev/feedback")
         
     def torch_parameters_classifier(self,name,parameters,reference="current")->object:
         """Route a PyTorch parameter name into the weights or bias storage bucket.
