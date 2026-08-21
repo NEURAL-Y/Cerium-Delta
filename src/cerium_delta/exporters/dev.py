@@ -1,4 +1,4 @@
-from .meterics.brain import NVS
+from ..meterics.brain import NVS
 
 class bridge:
     """Bridge class for converting framework-specific model metadata into one common format.
