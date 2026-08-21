@@ -37,7 +37,7 @@ class NVS:
     and numerical properties of weight matrices and bias vectors.
 
     The class stores intermediate values so that metric computation and
-    thresholding can be called separately. For example, calling
+    threshold can be called separately. For example, calling
     ``compute_lcs()`` populates ``self.lcs`` and then ``threshold_lcs()``
     uses those results to produce layer rankings.
 
@@ -142,7 +142,7 @@ class NVS:
       ``W @ W.T``.
     - The bias-based LCS uses a Gram matrix constructed from bias values
       and therefore applies a similar spectral intuition to vectors.
-    - Thresholding is implemented with percentile rankings for relative
+    - threshold is implemented with percentile rankings for relative
       comparison rather than absolute thresholds.
 
     Examples
@@ -286,112 +286,7 @@ class NVS:
       different epoch counts without accounting for the difference.
     - If a layer's bias or weight tensor does not appear in both the
       reference and trained snapshots, that layer is skipped by the
-      evolution score computation.
-
-    Common questions
-    ----------------
-    Q: Why does NVS use percentile ranks instead of fixed thresholds?
-    A: Percentile ranks are more robust across different models and
-       datasets because they express importance relative to the model's
-       own distribution of values. Fixed thresholds can be brittle when
-       the scale of values varies substantially.
-
-    Q: What does a large LCS value mean?
-    A: A large LCS value indicates that the layer has a larger
-       self-weighted spectral contribution according to the transformation
-       used in this metric. It does not imply that the layer is more
-       important for model performance in an absolute sense.
-
-    Q: Is the sensitivity score a gradient?
-    A: No. The sensitivity score is a proxy based on a downstream
-       transformed weight tensor. It resembles a local Jacobian-like
-       quantity, but it is not derived from the model's actual
-       backpropagation gradients.
-
-    Q: Can this be used for pruning?
-    A: It can provide useful diagnostic signals, but it should not be
-       the only criterion used for pruning decisions. NVS metrics are
-       designed to complement task-based validation and performance data.
-
-    Q: Why is the exponent compressed using ``log(abs(p) + eps)``?
-    A: The logarithmic compression strategy is a stable way to reduce the
-       exponent magnitude while preserving its sign-awareness. It is a
-       practical fallback that avoids hard clamping and enables the
-       adaptive loop to find a finite transform gradually.
-
-    Q: What happens if all values in a layer are zero?
-    A: The implementation adds a small epsilon before taking logarithms
-       to avoid ``log(0)``. Zero-valued layers will produce a well-defined
-       exponent and a resulting transformed tensor, though the absolute
-       metrics may be near zero.
-
-    Q: Are bias and weight metrics comparable?
-    A: They are computed with the same high-level logic, but weights and
-       biases are different kinds of parameters. Use them separately or
-       compare them with care.
-
-    Q: Is the dictionary ordering significant?
-    A: Yes. The methods that process consecutive layers rely on the
-       ordering of the dictionaries provided in ``model_state``. This
-       ordering should reflect the forward pass order of the model.
-
-    Q: Can NVS handle sparse weights?
-    A: The current implementation uses dense numpy operations and does
-       not natively support sparse matrix types. Sparse weights should
-       be converted to dense arrays before being passed into NVS.
-
-    Q: Why are bias distances normalized by epochs?
-    A: Normalizing by epochs provides a per-epoch drift metric. This
-       makes evolution scores more comparable across training runs with
-       different lengths.
-
-    Q: Will this work for recurrent or transformer-style models?
-    A: It depends on the shape and naming conventions of the weight and
-       bias tensors. The current code expects pairwise compatible
-       weight matrices for the operations performed.
-
-    Q: What are the key failure modes?
-    A: The main failure modes are shape incompatibility and numerical
-       instability during exponentiation. The adaptive transformation
-       helpers mitigate the latter, but they do not address every possible
-       invalid shape scenario.
-
-    Q: Should I call ``compute("all")`` or the individual methods?
-    A: ``compute("all")`` is convenient and executes all metrics plus
-       the ranking steps. If you need more control or want to inspect
-       intermediate results, call the individual methods instead.
-
-    Q: How should I interpret percentile scores?
-    A: Percentile scores are relative ranks. A score near 100 means the
-       layer is near the top of that metric's distribution for the
-       current model state.
-
-    Q: Are the metrics deterministic?
-    A: Yes, given the same ``model_state`` and the same numpy backend,
-       the results are deterministic.
-
-    Q: Does the module preserve input data?
-    A: Yes. All transformations are computed without modifying the
-       original ``model_state`` tensors.
-
-    Q: Why does NVS use spectral values and eigenvalues?
-    A: Spectral values capture dominant linear structures in matrices and
-       vectors. They provide a way to measure the relative scale of the
-       layer parameters, which is useful for the contribution and
-       sensitivity heuristics.
-
-    Q: Is NVS intended for production use?
-    A: NVS is primarily a research and diagnostics tool. It can be used
-       in production monitoring pipelines if the model shapes and
-       dictionary ordering are compatible, but it is not optimized for
-       high-throughput inference workloads.
-
-    Q: Can this be used for model debugging?
-    A: Yes. The metrics can help identify layers that behave differently
-       from the rest of the network, such as layers with unusually high
-       sensitivity or evolution.
-
-    Q: Are the percentile ranks stable?"""
+      evolution score computation."""
 
     def __init__(self, model_state: dict) -> None:
         # Stores all model states required by the metric pipeline.
@@ -475,17 +370,23 @@ class NVS:
 
         elif choose_metrics=="lcs":
             self.compute_lcs()
+            self.threshold_lcs()
             self.compute_lcs_bias()
+            self.threshold_lcs_bias()
             return {"weights":self.lcs,"biases":self.lcs_bias}
         
         elif choose_metrics=="sensitivity":
                     self.compute_sensitivity()
+                    self.threshold_sens()
                     self.compute_sensitivity_bias()
+                    self.threshold_sens_bias()
                     return {"weights":self.sensitivity_score,"biases":self.sensitivity_score_bias}
         
         elif choose_metrics=="evolution":
                     self.compute_evolution()
+                    self.threshold_evolution()
                     self.compute_evolution_bias()
+                    self.threshold_evolution_bias()
                     return {"weights":self.evolution_scores,"biases":self.evolution_scores_bias}
 
         else:
@@ -501,8 +402,7 @@ class NVS:
             self.threshold_evolution_bias()
             self.threshold_lcs()
             self.threshold_sens()
-            return (self.evolution_scores_bias,self.sensitivity_score_bias,self.lcs_bias,self.lcs,self.sensitivity_score,self.evolution_scores
-            )
+            return {"layer_contribution_score":{"weights":self.lcs,"biases":self.lcs_bias},"sensitivity_score":{"weights":self.sensitivity_score,"biases":self.sensitivity_score_bias},"evolution_score":{"weights":self.evolution_scores,"biases":self.evolution_scores_bias}}
     def adaptive_transformation_lcs(
         self,
         p,
@@ -514,7 +414,7 @@ class NVS:
 
         The transformation applies a sign-preserving power operation to the
         weight array using the absolute value of the exponent ``p``.
-        Because exponentiating very large or very small values can lead to
+        Because exponentiation very large or very small values can lead to
         numerical overflow, underflow, or NaN values, this method applies an
         adaptive compression strategy to the exponent until the result is
         finite.
