@@ -55,22 +55,22 @@ class bridge:
         delegated to the converter classes rather than being implemented here.
         """
         if self.framework=="torch":
-           from torch_converter import converter_pytorch
+           from .torch_converter import converter_pytorch
            # PyTorch model parameters are converted through the torch-specific extractor.
            self.convert=converter_pytorch(model=self.model,optimizer=self.optimizer,epoch=self.epoch,device=self.device,save_model=self.save_model)
 
         elif self.framework=="tensorflow":
-            from tensorflow_converter import converter_tensorflow
+            from .tensorflow_converter import converter_tensorflow
            # TensorFlow variables use the framework's variable naming convention.
             self.convert=converter_tensorflow(self.model,self.epoch,self.optimizer,self.save_model,self.device)
 
         elif self.framework=="sklearn":
-            from sklearn_converter import converter_sklearn
+            from .sklearn_converter import converter_sklearn
            # sklearn models do not use a training optimizer in the same way as deep learning models.
             self.convertsk=converter_sklearn(self.model,self.save_model)
 
         elif self.framework=="jax":
-            from jax_converter import converter_jax
+            from .jax_converter import converter_jax
            # JAX models are stored as PyTrees, so the JAX converter extracts named leaves.
             self.convert=converter_jax(self.model,self.optimizer,self.epoch,self.save_model)
         else:
