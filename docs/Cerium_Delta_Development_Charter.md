@@ -6,9 +6,9 @@
 ---
 
 **Document ID:** CD-DC-001
-**Version:** 1.0.0
+**Version:** 1.0
 **Status:** Active
-**Date:** 21 August 2026
+**Date:** 22 August 2026
 **Author / Project Lead:** @neural-y
 
 ---
@@ -496,7 +496,7 @@ development progress. Substantive revisions are logged in Section 13.
 **Name:** @neural-y
 **Role:** Founder & Project Lead
 **Electronic Signature:** **/s/ @neural-y**
-**Date:** 20 August 2026
+**Date:** 21 August 2026
 
 ---
 
@@ -504,9 +504,9 @@ development progress. Substantive revisions are logged in Section 13.
 
 | Version | Date | Change |
 |---|---|---|
-| 1.0 | 20 August 2026 | Initial charter |
-| 1.1 | 20 August 2026 | Consolidated repeated disclaimers into a single governing note (Section 1); distinguished 3.4 (empirical optimizer behavior) from 3.5 (analytical optimizer formula metrics); added open research questions and candidate starting approaches to V3 sections 4.3–4.6; added integration-path column to Section 5 language table |
-| 1.2 | 21 August 2026 | Added expected timeframes: V2 (1 Sep – 15 Oct 2026), V3 (30 Oct – 15 Nov 2026), reflected in Sections 3, 4, and 5 |
+| 1.0 | 21 August 2026 | Initial charter |
+| 1.1 | 21 August 2026 | Consolidated repeated disclaimers into a single governing note (Section 1); distinguished 3.4 (empirical optimizer behavior) from 3.5 (analytical optimizer formula metrics); added open research questions and candidate starting approaches to V3 sections 4.3–4.6; added integration-path column to Section 5 language table |
+| 1.2 | 22 August 2026 | Added expected timeframes: V2 (1 Sep – 15 Oct 2026), V3 (30 Oct – 15 Nov 2026), reflected in Sections 3, 4, and 5 |
 
 ---
 
