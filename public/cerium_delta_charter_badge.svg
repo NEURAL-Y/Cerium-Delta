@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="230" height="28" viewBox="0 0 230 28" role="img">
+<title>Cerium Delta development charter badge</title>
+<defs>
+<filter id="neonGlowSmall" x="-100%" y="-200%" width="300%" height="500%">
+<feGaussianBlur stdDeviation="2.2" result="blur">
+<animate attributeName="stdDeviation" values="1.6;3;1.6;1.6;0.6;2;1.6" keyTimes="0;0.3;0.5;0.68;0.72;0.76;1" dur="2.2s" repeatCount="indefinite"/>
+</feGaussianBlur>
+<feMerge>
+<feMergeNode in="blur"/>
+<feMergeNode in="blur"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+</filter>
+</defs>
+<rect x="0" y="0" width="90" height="28" rx="6" fill="#1a1a1f"/>
+<rect x="85" y="0" width="145" height="28" rx="6" fill="#111114" stroke="#534ab7" stroke-width="1">
+<animate attributeName="stroke-opacity" values="0.6;1;0.6;0.6;0.15;0.7;0.6" keyTimes="0;0.3;0.5;0.68;0.72;0.76;1" dur="2.2s" repeatCount="indefinite"/>
+</rect>
+<text x="45" y="18" text-anchor="middle" font-family="Verdana, sans-serif" font-size="11" fill="#c9c7f0">cerium delta</text>
+<g filter="url(#neonGlowSmall)">
+<text x="157" y="18" text-anchor="middle" font-family="Verdana, sans-serif" font-size="11" font-weight="bold" fill="#a89dff">development charter
+<animate attributeName="opacity" values="0.75;1;0.75;0.75;0.25;0.85;0.75" keyTimes="0;0.3;0.5;0.68;0.72;0.76;1" dur="2.2s" repeatCount="indefinite"/>
+<animate attributeName="fill" values="#a89dff;#c7bfff;#a89dff;#a89dff;#635a99;#b3a9ff;#a89dff" keyTimes="0;0.3;0.5;0.68;0.72;0.76;1" dur="2.2s" repeatCount="indefinite"/>
+</text>
+</g>
+</svg>
