@@ -22,6 +22,6 @@ __version__ = "1.0"
 
 __all__ = [
     "NVS",
-    "Bridge",
+    "bridge",
     "__version__",
 ]
