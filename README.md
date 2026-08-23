@@ -24,8 +24,7 @@ The objective is to provide real-time insight into the internal dynamics of neur
 ---
 # Other Configure
 [![License](https://img.shields.io/badge/License-Apache_2.0-cyan.svg)](https://github.com/NEURAL-Y/cerium-delta/blob/main/LICENSE)
-[![Pre-release](https://img.shields.io/badge/pre--release-v1.0.0-orange)](https://github.com/NEURAL-Y/cerium-delta/tags)
-![Beta Testing](https://img.shields.io/badge/Beta%20testing-yellow)
+[![release](https://img.shields.io/badge/release-v1.0.0-orange)](https://github.com/NEURAL-Y/cerium-delta/tags)
 [![status](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-shimmer.svg)](https://cerium-delta.pages.dev)
 ![paper](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-paper.svg)
 <a href="https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/Cerium_Delta_Development_Charter.md"><img src="https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/cerium_delta_charter_badge.svg" alt="Cerium Delta - Development Charter" /></a>
