@@ -593,7 +593,8 @@ This separation is important because visualization is only one possible consumer
 * [ ] Research Visualization
 
 ---
-
+# How to use
+``` pip install cerium-delta ```
 # Vision
 
 Modern machine-learning systems are increasingly complex.
