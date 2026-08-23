@@ -506,7 +506,7 @@ cerium-delta/
 │       │   ├── jax_converter.py
 │       │   └── sklearn_converter.py
 │       └── visualization/
-│           └── viz.py
+│           └── vizu.py
 │
 ├── docs/
 │   ├── ARCHITECTURE.md
@@ -594,6 +594,7 @@ This separation is important because visualization is only one possible consumer
 ---
 # How to use
 ``` pip install cerium-delta ```
+---> ```from cerium_delta.meterics.brain import NVS``` (OR) ```from cerium_delta.exporters.dev import bridge```
 # Vision
 
 Modern machine-learning systems are increasingly complex.
