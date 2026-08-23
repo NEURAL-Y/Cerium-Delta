@@ -16,9 +16,9 @@ Bridge
 """
 
 from .meterics.brain import NVS
-from .exporters.dev import Bridge
+from .exporters.dev import bridge
 
-__version__ = "1.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "NVS",
