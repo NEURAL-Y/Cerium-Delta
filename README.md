@@ -21,6 +21,9 @@ The objective is to provide real-time insight into the internal dynamics of neur
 [![joblib](https://img.shields.io/badge/joblib-parallel%20computing-yellowgreen?style=for-the-badge&logo=python&logoColor=white)](https://joblib.readthedocs.io/)
 [![SciPy](https://img.shields.io/badge/SciPy-scientific%20computing-8CAAE6?style=for-the-badge&logo=scipy&logoColor=white)](https://scipy.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-machine%20learning-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+[![Datashader](https://img.shields.io/badge/Datashader-0A66C2?style=for-the-badge&logo=python&logoColor=white)](https://datashader.org/)
+[![Seaborn](https://img.shields.io/badge/Seaborn-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://seaborn.pydata.org/)
+[![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
 ---
 # Other Configure
 [![License](https://img.shields.io/badge/License-Apache_2.0-cyan.svg)](https://github.com/NEURAL-Y/cerium-delta/blob/main/LICENSE)
@@ -29,6 +32,7 @@ The objective is to provide real-time insight into the internal dynamics of neur
 ![paper](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-paper.svg)
 <a href="https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/Cerium_Delta_Development_Charter.md"><img src="https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/cerium_delta_charter_badge.svg" alt="Cerium Delta - Development Charter" /></a>
 [![architecture](https://img.shields.io/badge/architecture-Cerium%20Delta-1f6feb)](https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/ARCHITECTURE.md)
+[![pre-release](https://img.shields.io/badge/pre--release-v1.1.0-cyan)](https://github.com/NEURAL-Y/cerium-delta/tags)
 # What We Observe
 
 Cerium Delta aims to monitor the internal state of neural architectures in real time.
