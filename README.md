@@ -27,12 +27,13 @@ The objective is to provide real-time insight into the internal dynamics of neur
 ---
 # Other Configure
 [![License](https://img.shields.io/badge/License-Apache_2.0-cyan.svg)](https://github.com/NEURAL-Y/cerium-delta/blob/main/LICENSE)
-[![release](https://img.shields.io/badge/release-v1.0.0-orange)](https://github.com/NEURAL-Y/cerium-delta/tags)
+[![release](https://img.shields.io/badge/release-v1.0.0-orange)](https://github.com/NEURAL-Y/cerium-delta/releases/tag/v1.0.0)
 [![status](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-shimmer.svg)](https://cerium-delta.pages.dev)
 ![paper](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-paper.svg)
 <a href="https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/Cerium_Delta_Development_Charter.md"><img src="https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/cerium_delta_charter_badge.svg" alt="Cerium Delta - Development Charter" /></a>
 [![architecture](https://img.shields.io/badge/architecture-Cerium%20Delta-1f6feb)](https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/ARCHITECTURE.md)
-[![pre-release](https://img.shields.io/badge/pre--release-v1.1.0-cyan)](https://github.com/NEURAL-Y/cerium-delta/tags)
+[![pre-release](https://img.shields.io/badge/pre--release-v1.1.0-cyan)](https://github.com/NEURAL-Y/cerium-delta/releases/tag/v1.1.0)<br>
+```Note --> You can see what's new will be coming and comes by just clicking on badge of release and pre-release. we provide demo image or source code to see actually what's new is developing now```
 # What We Observe
 
 Cerium Delta aims to monitor the internal state of neural architectures in real time.
