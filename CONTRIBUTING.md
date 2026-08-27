@@ -1,131 +1,70 @@
-# 🌟 Becoming a Core Contributor
+# Contributing to Cerium-Delta
 
-Cerium Delta is built through community collaboration. Every contribution, whether it is a bug fix, feature, documentation improvement, or research enhancement, helps move the project forward.
+All contributions via Pull Request. No direct push to `main`.
 
-Core Contributors are trusted community members responsible for maintaining the project's quality, stability, and long-term direction.
+## How to Contribute
 
----
+1. Fork -> Branch `feat/your-metric` -> PR to `main`
+2. One feature per PR (e.g., one metric: LCS, IFS, AHI)
+3. For new metrics, include: math definition, assumptions, limitations, test
+4. CI must pass
 
-# 📈 Eligibility
+## Core Community Member
 
-To be considered for promotion, a contributor should demonstrate **consistent, high-quality contributions** over time.
+### BOOTSTRAP PHASE - First 10 Core Members [ACTIVE NOW]
 
-A contributor will generally qualify after meeting **one** of the following guidelines:
+Since this is early research + engineering, first 10 core members need only:
 
-### Option A • Major Contributions
+> **1 Quality PR to become Core**
 
-Successfully contribute **10 or more significant Pull Requests**, such as:
+Quality PR means:
+- New observability metric (LCS, Sensitivity, Evolution, etc.)
+- Framework exporter (PyTorch, TF, JAX, ONNX)
+- Architecture health detector (vanishing gradient, dead neuron, bottleneck)
+- Real-time tracking improvement or visualization
+- Not typo/formatting/AI spam
 
-* ✨ New features
-* 🧠 Architecture improvements
-* ⚡ Performance optimizations
-* 🔬 Research contributions
-* 📚 Major documentation improvements
-* 🏗️ Infrastructure enhancements
+Final invite during bootstrap stays with @NEURAL-Y.
 
-### Option B • Maintenance Contributions
+Ends after 10 core members.
 
-Successfully contribute **15 or more maintenance Pull Requests**, including:
+### After Bootstrap - Full Rules
 
-* 🐛 Bug fixes
-* ♻️ Refactoring
-* 🔒 Security improvements
-* 🧪 Testing improvements
-* 📦 Dependency maintenance
-* 📝 Documentation updates
+Meet ONE:
 
-> These numbers are **guidelines rather than guarantees**. Promotion is based on contribution quality, technical judgment, collaboration, and long-term involvement.
+**A) 1 Major Impact**
+- New core system: Neuron Vitality Benchmark (NVB), Information Flow Score, Architecture Health Index
+- Major framework support or real-time evolution tracking engine
 
----
+**B) 10 Middle-Level PRs**
+- New layer analysis, evolution tracker, health indicator, exporter improvement
 
-# 🏛️ Promotion Process
+**C) 15 Small Improvements**
+- Bug fixes, tests, docs, metric validation
+- Spam rule: typo/formatting = 0.5 PR
 
-Once a contributor has demonstrated sustained, high-quality work:
+### Core Benefits
 
-1. Existing Core Contributors review the contributor's overall history.
-2. Technical quality, consistency, and collaboration are evaluated.
-3. A discussion is held among the Core Contributors.
-4. If approved, the contributor is invited to join the Core Team.
+- Review other PRs
+- Direct commit to non-main branches (`dev/*`, `research/*`, `exp/*`) with your name
+- Refer other researchers/devs to core
+- Merge authority
+- **Governance: Can change CONTRIBUTING.md and PR rules by voting**
 
-Promotion is earned through trust, not automatically granted by reaching a contribution count.
+### Governance - Voting
 
----
+- Any core can propose change to CONTRIBUTING.md / PR rules via Proposal PR
+- Vote period: 7 days
+- Pass: >50% YES + owner approval if core < 10, >60% YES if core >= 10
+- Each core = 1 vote
+- Owner veto during bootstrap
 
-# 🔑 Responsibilities & Permissions
+### Merge Policy
 
-Core Contributors are trusted to help maintain Cerium Delta.
+- `main` protected, PR only
+- If total core < 3: 1 core approval to merge
+- If total core >= 3: 2 core approvals to merge
+- Core can refer another core for second review
+- No force push
 
-They may:
-
-* ✅ Review Pull Requests
-* ✅ Approve Pull Requests
-* ✅ Merge approved Pull Requests
-* ✅ Participate in architectural discussions
-* ✅ Help define the project's roadmap
-* ✅ Work directly on the `dev` branch
-* ✅ Work directly on the `testing` branch
-* ✅ Mentor new contributors
-
----
-
-# 📜 Core Contributor Rules
-
-Being a Core Contributor comes with additional responsibility.
-
-### Review Requirements
-
-* Every significant Pull Request should receive review from **at least two Core Contributors** before merging.
-* Contributors should avoid reviewing their own work whenever possible.
-
-### Branch Protection
-
-* Direct commits to the `main` branch are **strictly prohibited**.
-* Development occurs through feature branches, `dev`, and `testing`.
-
-### Documentation
-
-Significant changes should include:
-
-* CHANGELOG updates
-* Documentation updates
-* Migration notes (if applicable)
-
-### Code Quality
-
-Core Contributors are expected to:
-
-* Follow project coding standards
-* Maintain backward compatibility whenever practical
-* Prioritize readability and maintainability
-* Encourage constructive code reviews
-* Help new contributors succeed
-
----
-
-# 🤝 Code Review Philosophy
-
-Reviews are intended to improve the project, not criticize contributors.
-
-Every review should be:
-
-* Respectful
-* Constructive
-* Evidence-based
-* Focused on improving code quality
-
-Healthy discussion is encouraged. Technical disagreements should always remain professional.
-
----
-
-# 🚀 Core Values
-
-Core Contributors help preserve the principles that define Cerium Delta:
-
-* 🧠 Research-driven development
-* 🔍 Transparency
-* ⚡ Performance
-* 📚 Clear documentation
-* 🤝 Collaboration
-* 🌍 Open-source first
-
-These principles guide every decision made within the project.
+### Branch Flow
