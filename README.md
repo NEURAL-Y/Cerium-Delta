@@ -1,9 +1,10 @@
 # CERIUM-DELTA
-![CERIUM-DELTA](./public/Cerium-delta.png "CERIUM-DELTA-LOGO")
+![CERIUM-DELTA](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/Cerium-delta.png "CERIUM-DELTA-LOGO")
+
 
 
 # Beyond Visualization
-![SAMPLE](./public/sample.png.png "sample image")<br>
+![SAMPLE](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/sample.png.png "sample image")<br>
 Cerium Delta is not a neural network drawing tool.
 Most architecture visualization tools generate static diagrams that describe how a model is constructed. While useful for documentation, they provide little insight into how a model behaves during training or inference.
 
