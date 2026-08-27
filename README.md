@@ -173,31 +173,6 @@ from cerium_delta.metrics.brain import NVS
 from cerium_delta.exporters.dev import bridge
 ```
 
-## Roadmap
-
-**Core Observability**
-- [ ] Activation Tracking
-- [ ] Gradient Tracking
-- [ ] Weight Evolution Tracking
-- [ ] Dropout Monitoring
-
-**Neural Analysis**
-- [ ] Layer Contribution Score
-- [ ] Sensitivity Analysis
-- [ ] Evolution Analysis
-
-**Framework Support**
-- [ ] PyTorch
-- [ ] TensorFlow
-- [ ] JAX
-- [ ] ONNX
-- [ ] scikit-learn
-
-**Platform**
-- [ ] Real-Time Dashboard
-- [ ] Architecture Timeline
-- [ ] Research Visualization
-
 ## Vision
 
 ```text
