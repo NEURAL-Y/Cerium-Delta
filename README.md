@@ -10,21 +10,6 @@ Most architecture visualization tools generate static diagrams that describe how
 Cerium Delta focuses on **observability**, not just visualization.
 
 The objective is to provide real-time insight into the internal dynamics of neural architectures, allowing researchers and developers to understand how information flows through a model as it learns.<br>
-# Build stack
-[![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![turtle](https://img.shields.io/badge/turtle-Python%20Stdlib-blue?style=for-the-badge&logo=python&logoColor=white)](https://docs.python.org/3/library/turtle.html)
-[![Matplotlib](https://img.shields.io/badge/Matplotlib-visualizations-blue?style=for-the-badge&logo=python&logoColor=white)](https://matplotlib.org/)
-[![JAX](https://img.shields.io/badge/JAX-autograd%20%26%20XLA-orange?style=for-the-badge&logo=python&logoColor=white)](https://jax.readthedocs.io/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-deep%20learning-ee4c2c?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-deep%20learning-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
-[![NumPy](https://img.shields.io/badge/NumPy-numerical%20computing-013243?style=for-the-badge&logo=numpy&logoColor=white)](https://numpy.org/)
-[![joblib](https://img.shields.io/badge/joblib-parallel%20computing-yellowgreen?style=for-the-badge&logo=python&logoColor=white)](https://joblib.readthedocs.io/)
-[![SciPy](https://img.shields.io/badge/SciPy-scientific%20computing-8CAAE6?style=for-the-badge&logo=scipy&logoColor=white)](https://scipy.org/)
-[![scikit-learn](https://img.shields.io/badge/scikit--learn-machine%20learning-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
-[![Datashader](https://img.shields.io/badge/Datashader-0A66C2?style=for-the-badge&logo=python&logoColor=white)](https://datashader.org/)
-[![Seaborn](https://img.shields.io/badge/Seaborn-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://seaborn.pydata.org/)
-[![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
----
 # Other Configure
 [![License](https://img.shields.io/badge/License-Apache_2.0-cyan.svg)](https://github.com/NEURAL-Y/cerium-delta/blob/main/LICENSE)
 [![release](https://img.shields.io/badge/release-v1.0.0-orange)](https://github.com/NEURAL-Y/cerium-delta/releases/tag/v1.0.0)
