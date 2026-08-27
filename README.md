@@ -151,35 +151,6 @@ Cerium Delta is designed to work across ML ecosystems, with model-state extracti
 - scikit-learn
 - ONNX
 
-## Architecture
-
-```text
-cerium-delta/
-├── src/
-│   └── cerium_delta/
-│       ├── __init__.py
-│       ├── dev.py
-│       ├── metrics/
-│       │   └── brain.py
-│       ├── exporters/
-│       │   ├── torch_converter.py
-│       │   ├── tensorflow_converter.py
-│       │   ├── jax_converter.py
-│       │   └── sklearn_converter.py
-│       └── visualization/
-│           └── vizu.py
-│
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── Repo_Structure.md
-│
-├── tests/
-│
-├── README.md
-├── LICENSE
-├── pyproject.toml
-└── .gitignore
-```
 
 Pipeline:
 
