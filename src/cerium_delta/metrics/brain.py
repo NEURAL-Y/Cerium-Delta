@@ -288,9 +288,10 @@ class NVS:
       reference and trained snapshots, that layer is skipped by the
       evolution score computation."""
 
-    def __init__(self, model_state: dict) -> None:
+    def __init__(self, model_state: dict,max_loop:int=500) -> None:
         # Stores all model states required by the metric pipeline.
         self.model_state = model_state
+        self.max_loop=max_loop
 
     def compute(self, choose_metrics="lcs")->object:
         """
@@ -406,8 +407,7 @@ class NVS:
     def adaptive_transformation_lcs(
         self,
         p,
-        weight,
-        max_loop=500
+        weight
     ) -> NDArray[np.float64]:
         """
         Adaptively stabilize the LCS power transformation.
@@ -478,7 +478,7 @@ class NVS:
             )
         )
 
-        for _ in range(max_loop):
+        for _ in range(self.max_loop):
             try:
                 with np.errstate(
                     over="raise",
@@ -503,8 +503,7 @@ class NVS:
     def adaptive_transformation_sens(
     self,
     p,
-    weight,
-    max_loop=500
+    weight
 ) -> NDArray[np.float64]:
         """
         Adaptive transformation for the sensitivity calculation.
@@ -566,7 +565,7 @@ class NVS:
             )
         )
 
-        for _ in range(max_loop):
+        for _ in range(self.max_loop):
             try:
                 with np.errstate(
                     invalid="raise",
@@ -645,17 +644,21 @@ class NVS:
                 np.sqrt(lambda_max) + 1e-12
             )
 
-        # Adaptive transformation
-            powered= self.adaptive_transformation_lcs(
-                p=power,
-                weight=weight
-            )
-
+            try:
+                powered = self.adaptive_transformation_lcs(
+                    p=power,
+                    weight=weight
+                )
+                self.lcs[name] = weight * powered
+            except Exception as e:
+                raise RuntimeError(
+                    "Adaptive transformation failed for layer due to numerical instability. we suggest you to increase the max_loop parameter. for more details check the error message: {} \n for learning more about this issue visit our documentation site --> https://cerium-delta.pages.dev".format(e)
+                )
             # Store the actual exponent used
             # self.layer_powers[name] = final_power
 
             # LCS
-            self.lcs[name] = weight * powered
+            
 
         return self.lcs
     
@@ -721,16 +724,20 @@ class NVS:
             # Adaptive transformation - protects the (p_next - 1)
             # exponent used in the jacobian, validated against the
             # actual downstream matmul with current_weight.
-            jac_powered= self.adaptive_transformation_sens(
-                p=p_next,
-                weight=next_weight
-            )
-
-            sensitivity = np.linalg.norm(
-                                np.outer(jac_powered,current_weight)
-                            )
-            self.sensitivity_score["raw_values"][layers[i]]=np.outer(jac_powered,current_weight)
-            self.sensitivity_score["norm_values"][layers[i]] = sensitivity
+            try:
+                jac_powered= self.adaptive_transformation_sens(
+                    p=p_next,
+                    weight=next_weight
+                )
+                sensitivity = np.linalg.norm(
+                                    np.outer(jac_powered,current_weight)
+                                )
+                self.sensitivity_score["raw_values"][layers[i]]=np.outer(jac_powered,current_weight)
+                self.sensitivity_score["norm_values"][layers[i]] = sensitivity
+            except Exception as e: 
+                raise RuntimeError(
+                    "Adaptive transformation failed for layer due to numerical instability. we suggest you to increase the max_loop parameter. for more details check the error message: {} \n for learning more about this issue visit our documentation site --> https://cerium-delta.pages.dev".format(e)
+                )
         return self.sensitivity_score
 
     def compute_evolution(self)->dict:
@@ -946,12 +953,18 @@ class NVS:
             power = np.log(np.sqrt(lambda_max) + 1e-12)
 
             # Adaptive transformation - same protection as compute_lcs
-            powered= self.adaptive_transformation_lcs(
-                p=power,
-                weight=b,
-            )
+            try:
 
-            self.lcs_bias[name] = b * powered
+                powered= self.adaptive_transformation_lcs(
+                    p=power,
+                    weight=b,
+                )
+
+                self.lcs_bias[name] = b * powered
+            except Exception as e:
+                raise RuntimeError(
+                    "Adaptive transformation failed for layer due to numerical instability. we suggest you to increase the max_loop parameter. for more details check the error message: {} \n for learning more about this issue visit our documentation site --> https://cerium-delta.pages.dev".format(e)
+                )
 
         return self.lcs_bias
 
@@ -1030,17 +1043,22 @@ class NVS:
             # compute_sensitivity, but validated against the outer
             # product (bias vectors don't share a contraction
             # dimension the way weight matrices do).
-            jac_powered = self.adaptive_transformation_sens(
-                p=p_next,
-                weight=next_bias,
-            )
+            try:
+                jac_powered = self.adaptive_transformation_sens(
+                    p=p_next,
+                    weight=next_bias,
+                )
 
-            sensitivity = np.linalg.norm(
-                np.outer(jac_powered,current_bias)
-            )
-            
-            self.sensitivity_score_bias["raw_values"][layers[i]]=np.outer(jac_powered,current_bias)
-            self.sensitivity_score["norm_values"][layers[i]]=sensitivity
+                sensitivity = np.linalg.norm(
+                    np.outer(jac_powered,current_bias)
+                )
+                
+                self.sensitivity_score_bias["raw_values"][layers[i]]=np.outer(jac_powered,current_bias)
+                self.sensitivity_score["norm_values"][layers[i]]=sensitivity
+            except Exception as e:
+                raise RuntimeError(
+                    "Adaptive transformation failed for layer due to numerical instability. we suggest you to increase the max_loop parameter. for more details check the error message: {} \n for learning more about this issue visit our documentation site --> https://cerium-delta.pages.dev".format(e)
+                )
 
         return self.sensitivity_score_bias
 
