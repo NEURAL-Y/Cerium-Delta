@@ -1,4 +1,7 @@
 from ..meterics.brain import NVS
+import onnx
+from onnx import numpy_helper, helper, TensorProto
+from numpy.typing import NDArray
 
 class bridge:
     """Bridge class for converting framework-specific model metadata into one common format.
@@ -18,7 +21,7 @@ class bridge:
     weights, biases, trained parameters, and epoch information without needing to know which
     framework produced the data.
     """
-    def __init__(self,model,*,framework,compute_choice="lcs",epoch=0,device="cpu",save_model=None,optimizer=None)->None:
+    def __init__(self,model:object,*,framework:str,compute_choice:str="lcs",epoch:int=0,device:str="cpu",save_model:str|None=None,optimizer:object|None=None)->None:
         """Initialize the bridge with the model, framework, and training metadata.
 
         Parameters
@@ -55,22 +58,22 @@ class bridge:
         delegated to the converter classes rather than being implemented here.
         """
         if self.framework=="torch":
-           from .torch_converter import converter_pytorch
+           from torch_converter import converter_pytorch
            # PyTorch model parameters are converted through the torch-specific extractor.
            self.convert=converter_pytorch(model=self.model,optimizer=self.optimizer,epoch=self.epoch,device=self.device,save_model=self.save_model)
 
         elif self.framework=="tensorflow":
-            from .tensorflow_converter import converter_tensorflow
+            from tensorflow_converter import converter_tensorflow
            # TensorFlow variables use the framework's variable naming convention.
             self.convert=converter_tensorflow(self.model,self.epoch,self.optimizer,self.save_model,self.device)
 
         elif self.framework=="sklearn":
-            from .sklearn_converter import converter_sklearn
+            from sklearn_converter import converter_sklearn
            # sklearn models do not use a training optimizer in the same way as deep learning models.
             self.convertsk=converter_sklearn(self.model,self.save_model)
 
         elif self.framework=="jax":
-            from .jax_converter import converter_jax
+            from jax_converter import converter_jax
            # JAX models are stored as PyTrees, so the JAX converter extracts named leaves.
             self.convert=converter_jax(self.model,self.optimizer,self.epoch,self.save_model)
         else:
@@ -199,8 +202,39 @@ class bridge:
             return self.nvs_result
 
         except Exception as e:
-           raise RuntimeError(f"File_error : there is something which struck the operations {e} \n report us on --> https://cerium-delta.pages.dev/feedback")
+           raise RuntimeError(f"File_caught_bug : there is something which struck the operations {e} \n you can report us on --> https://cerium-delta.pages.dev/feedback")
+
+    def pyarr_to_onnx(self,*,arr:NDArray,output_path:str,name_arr:str)->None:
+
+        """Convert a NumPy array into an ONNX model containing only that array.
         
+        Parameters
+        ----------
+        arr : NDArray
+            NumPy array to be converted into an ONNX initializer.
+        output_path : str
+            File path where the ONNX model will be saved.
+        name_arr : str
+            Name to assign to the ONNX tensor corresponding to the NumPy array.
+        """
+
+        onnx_tensor = numpy_helper.from_array(arr, name=name_arr)
+        
+        graph = helper.make_graph(
+            nodes=[], # no computation
+            name="save_array_only",
+            inputs=[], # nothing to feed at runtime
+            outputs=[
+                helper.make_tensor_value_info(name_arr, TensorProto.FLOAT, arr.shape)
+            ],
+            initializer=[onnx_tensor] 
+        )
+        
+        model = helper.make_model(graph)
+        onnx.save(model, output_path)
+        
+        return None
+
     def torch_parameters_classifier(self,name,parameters,reference="current")->object:
         """Route a PyTorch parameter name into the weights or bias storage bucket.
 
@@ -218,9 +252,11 @@ class bridge:
             else:
                 return None
         else:
+            
             if name.endswith(".weight"):
                             self.nvs_memory["weights_train"][f"layer {self.layer_train.get("torch_weight_index",0)}"] = parameters
                             self.layer_train["torch_weight_index"]+=1
+                
             elif name.endswith(".bias"):
                             self.nvs_memory["bias_train"][f"layer {self.layer_train.get("torch_bias_index",0)}"] = parameters
                             self.layer_train["torch_bias_index"]+=1
@@ -228,6 +264,7 @@ class bridge:
                 return None
 
         return None
+        
     def tensorflow_parameters_classifier(self,name,parameters,reference="current")->object:
         """Route TensorFlow variable names into the shared weights/bias buckets.
 
@@ -236,18 +273,23 @@ class bridge:
         dictionary with a fresh index each time.
         """
         if reference=="current":
+            
             if "kernel" in name.lower():
                 self.nvs_memory["weights"][f"layer {self.layer_current.get("tensorflow_weight_index",0)}"] = parameters
                 self.layer_current["tensorflow_weight_index"]+=1
+                
             elif "bias" in name.lower():
                 self.nvs_memory["bias"][f"layer {self.layer_current.get("tensorflow_bias_index",0)}"] = parameters
                 self.layer_current["tensorflow_bias_index"]+=1
+                
             else:
                 return None
         else:
+            
            if "kernel" in name.lower():
                            self.nvs_memory["weights_train"][f"layer {self.layer_train.get("tensorflow_weight_index",0)}"] = parameters
                            self.layer_train["tensorflow_weight_index"]+=1
+               
            elif "bias" in name.lower():
                            self.nvs_memory["bias_train"][f"layer {self.layer_train.get("tensorflow_bias_index",0)}"] = parameters
                            self.layer_train["tensorflow_bias_index"]+=1
@@ -274,10 +316,13 @@ class bridge:
 
         if layer_idx is not None:
             layer_name = f"layer {layer_idx}"
+            
         else:
             layer_name = "layer0"
+            
             if "." in name:
                 candidate = name.split(".")[0]
+                
                 if candidate.startswith("layer"):
                     layer_name = candidate
 
