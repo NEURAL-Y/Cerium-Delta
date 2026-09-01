@@ -21,7 +21,7 @@ class bridge:
     weights, biases, trained parameters, and epoch information without needing to know which
     framework produced the data.
     """
-    def __init__(self,model:object,*,framework:str,compute_choice:str="lcs",epoch:int=0,device:str="cpu",save_model:str|None=None,optimizer:object|None=None)->None:
+    def __init__(self,model:object,*,framework:str,compute_choice:str="lcs",epoch:int=0,device:str="cpu",max_loop:int=500,save_model:str|None=None,optimizer:object|None=None)->None:
         """Initialize the bridge with the model, framework, and training metadata.
 
         Parameters
@@ -48,6 +48,7 @@ class bridge:
         self.epoch=epoch
         self.save_model=save_model
         self.optimizer=optimizer
+        self.max_loop=max_loop
         self.nvs_memory={"weights":{},"weights_train":{},"bias":{},"bias_train":{},"epochs":0,"co_relations_layers":{}}
     
     def checker(self)->None:
@@ -194,7 +195,7 @@ class bridge:
     
     def nvs_export_info(self)->object:
         self.nvs_mem=self.information_extract()
-        nvs=NVS(self.nvs_mem)
+        nvs=NVS(self.nvs_mem,self.max_loop)
 
         try:
             
