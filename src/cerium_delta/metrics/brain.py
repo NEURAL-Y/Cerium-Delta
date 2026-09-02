@@ -374,21 +374,21 @@ class NVS:
             self.threshold_lcs()
             self.compute_lcs_bias()
             self.threshold_lcs_bias()
-            return {"weights":self.lcs,"biases":self.lcs_bias}
+            return {"layer_contribution_score":{"weights":self.lcs,"biases":self.lcs_bias}}
         
         elif choose_metrics=="sensitivity":
                     self.compute_sensitivity()
                     self.threshold_sens()
                     self.compute_sensitivity_bias()
                     self.threshold_sens_bias()
-                    return {"weights":self.sensitivity_score,"biases":self.sensitivity_score_bias}
+                    return {"sensitivity_score":{"weights":self.sensitivity_score,"biases":self.sensitivity_score_bias}}
         
         elif choose_metrics=="evolution":
                     self.compute_evolution()
                     self.threshold_evolution()
                     self.compute_evolution_bias()
                     self.threshold_evolution_bias()
-                    return {"weights":self.evolution_scores,"biases":self.evolution_scores_bias}
+                    return {"evolution_score":{"weights":self.evolution_scores,"biases":self.evolution_scores_bias}}
 
         else:
             self.compute_lcs()
