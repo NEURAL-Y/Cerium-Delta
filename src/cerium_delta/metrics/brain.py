@@ -1054,7 +1054,7 @@ class NVS:
                 )
                 
                 self.sensitivity_score_bias["raw_values"][layers[i]]=np.outer(jac_powered,current_bias)
-                self.sensitivity_score["norm_values"][layers[i]]=sensitivity
+                self.sensitivity_score_bias["norm_values"][layers[i]]=sensitivity
             except Exception as e:
                 raise RuntimeError(
                     "Adaptive transformation failed for layer due to numerical instability. we suggest you to increase the max_loop parameter. for more details check the error message: {} \n for learning more about this issue visit our documentation site --> https://cerium-delta.pages.dev".format(e)
@@ -1116,7 +1116,7 @@ class NVS:
                 )
                else:
                    self.evolution_scores_bias["raw_values"][k] = (
-                                       (trained_bias[k] - reference_bias[k]) / epochs
+                                       (trained_bias[k] - reference_bias[k])
                                    )
                    self.evolution_scores_bias["norm_values"][k] = (
                                        np.linalg.norm(trained_bias[k] - reference_bias[k])
