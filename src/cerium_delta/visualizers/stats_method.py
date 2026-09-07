@@ -59,7 +59,7 @@ class Statistical:
                         for _, value in data[key].items():
                             y_values.append(value)
 
-        if isinstance(x_values[0], np.ndarray):
+        if isinstance(x_values[0], np.ndarray) and isinstance(x_values[1],np.ndarray):
             for layer, (x_layer, y_layer) in enumerate(
                 zip(x_values, y_values)
             ):
@@ -73,8 +73,8 @@ class Statistical:
                     }
                 )
         else:
-            raise AttributeError(
-                "You need to pass at least two layers of arrays, not a single one."
+            raise ValueError(
+                "Expected at least two layers of array data."
             )
 
         return result
@@ -119,7 +119,7 @@ class Statistical:
                         for _, value in data[key].items():
                             y_values.append(value)
 
-        if isinstance(x_values[0], np.ndarray):
+        if isinstance(x_values[0], np.ndarray)and isinstance(x_values[1],np.ndarray):
             for layer, (x_layer, y_layer) in enumerate(
                 zip(x_values, y_values)
             ):
@@ -132,8 +132,8 @@ class Statistical:
                     }
                 )
         else:
-            raise AttributeError(
-                "You need to pass at least two layers of arrays, not a single one."
+            raise ValueError(
+                "Expected at least two layers of array data."
             )
 
         return result
@@ -274,7 +274,7 @@ class Statistical:
                         for value in data[key].values():
                             y_values.append(value)
 
-        if isinstance(x_values[0], np.ndarray):
+        if isinstance(x_values[0], np.ndarray) and isinstance(x_values[1],np.ndarray):
             for layer, (x_layer, y_layer) in enumerate(
                 zip(x_values, y_values)
             ):
@@ -287,8 +287,8 @@ class Statistical:
                     }
                 )
         else:
-            raise AttributeError(
-                "You need to pass at least two layers of arrays, not a single one."
+            raise ValueError(
+                "Expected at least two layers of array data."
             )
 
         return result
