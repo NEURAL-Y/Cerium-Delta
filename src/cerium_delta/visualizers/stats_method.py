@@ -21,20 +21,31 @@ class Statistical:
 
     def pearson_correlation(self, *, data, kind="dual_weights"):
         """
-        Calculate Pearson correlation for corresponding layers.
+        Calculate Pearson correlation between corresponding layers.
+
+        Each layer is flattened independently before correlation is
+        calculated, allowing N-dimensional layer arrays to be analyzed
+        while preserving layer boundaries.
 
         Parameters
         ----------
         data : dict
             Layer-wise model data containing parameter groups.
         kind : str, default="dual_weights"
-            Parameter groups to compare. One of "dual_weights" or
-            "dual_biases".
+            Parameter groups to compare. Supported values are
+            "dual_weights" and "dual_biases".
 
         Returns
         -------
         list[dict]
             Pearson correlation coefficient and p-value for each layer.
+
+        Raises
+        ------
+        ValueError
+            If no layer data is provided, the number of layers differs
+            between parameter groups, or corresponding layers contain
+            different numbers of elements.
         """
         x_values = []
         y_values = []
@@ -59,42 +70,73 @@ class Statistical:
                         for _, value in data[key].items():
                             y_values.append(value)
 
-        if isinstance(x_values[0], np.ndarray) and isinstance(x_values[1],np.ndarray):
-            for layer, (x_layer, y_layer) in enumerate(
-                zip(x_values, y_values)
-            ):
-                correlation, p_value = pearsonr(x_layer, y_layer)
-
-                result.append(
-                    {
-                        "layer": layer,
-                        "R_value": correlation,
-                        "p_value": p_value,
-                    }
+            case _:
+                raise ValueError(
+                    'Expected kind to be "dual_weights" or "dual_biases".'
                 )
-        else:
+
+        if not x_values or not y_values:
             raise ValueError(
-                "Expected at least two layers of array data."
+                "Expected data to contain two non-empty parameter groups."
+            )
+
+        if len(x_values) != len(y_values):
+            raise ValueError(
+                "Expected both parameter groups to contain the same number of layers."
+            )
+
+        for layer, (x_layer, y_layer) in enumerate(
+            zip(x_values, y_values)
+        ):
+            x_layer = np.asarray(x_layer).ravel()
+            y_layer = np.asarray(y_layer).ravel()
+
+            if x_layer.size != y_layer.size:
+                raise ValueError(
+                    f"Expected corresponding layers to contain the same "
+                    f"number of elements. Layer {layer} contains "
+                    f"{x_layer.size} and {y_layer.size} elements."
+                )
+
+            correlation, p_value = pearsonr(x_layer, y_layer)
+
+            result.append(
+                {
+                    "layer": layer,
+                    "R_value": correlation,
+                    "p_value": p_value,
+                }
             )
 
         return result
 
     def covariance(self, *, data, kind="dual_weights"):
         """
-        Calculate covariance for corresponding layers.
+        Calculate covariance between corresponding layers.
+
+        Each layer is flattened independently before covariance is
+        calculated, allowing N-dimensional layer arrays to be analyzed
+        while preserving layer boundaries.
 
         Parameters
         ----------
         data : dict
             Layer-wise model data containing parameter groups.
         kind : str, default="dual_weights"
-            Parameter groups to compare. One of "dual_weights" or
-            "dual_biases".
+            Parameter groups to compare. Supported values are
+            "dual_weights" and "dual_biases".
 
         Returns
         -------
         list[dict]
             Covariance matrix for each layer.
+
+        Raises
+        ------
+        ValueError
+            If no layer data is provided, the number of layers differs
+            between parameter groups, or corresponding layers contain
+            different numbers of elements.
         """
         x_values = []
         y_values = []
@@ -119,21 +161,41 @@ class Statistical:
                         for _, value in data[key].items():
                             y_values.append(value)
 
-        if isinstance(x_values[0], np.ndarray)and isinstance(x_values[1],np.ndarray):
-            for layer, (x_layer, y_layer) in enumerate(
-                zip(x_values, y_values)
-            ):
-                covariance_value = np.cov(x_layer, y_layer)
-
-                result.append(
-                    {
-                        "layer": layer,
-                        "Result_value": covariance_value,
-                    }
+            case _:
+                raise ValueError(
+                    'Expected kind to be "dual_weights" or "dual_biases".'
                 )
-        else:
+
+        if not x_values or not y_values:
             raise ValueError(
-                "Expected at least two layers of array data."
+                "Expected data to contain two non-empty parameter groups."
+            )
+
+        if len(x_values) != len(y_values):
+            raise ValueError(
+                "Expected both parameter groups to contain the same number of layers."
+            )
+
+        for layer, (x_layer, y_layer) in enumerate(
+            zip(x_values, y_values)
+        ):
+            x_layer = np.asarray(x_layer).ravel()
+            y_layer = np.asarray(y_layer).ravel()
+
+            if x_layer.size != y_layer.size:
+                raise ValueError(
+                    f"Expected corresponding layers to contain the same "
+                    f"number of elements. Layer {layer} contains "
+                    f"{x_layer.size} and {y_layer.size} elements."
+                )
+
+            covariance_value = np.cov(x_layer, y_layer)
+
+            result.append(
+                {
+                    "layer": layer,
+                    "Result_value": covariance_value,
+                }
             )
 
         return result
@@ -148,20 +210,33 @@ class Statistical:
         """
         Calculate Spearman or Kendall rank correlation layer-wise.
 
+        Each layer is flattened independently before correlation is
+        calculated, allowing N-dimensional layer arrays to be analyzed
+        while preserving layer boundaries.
+
         Parameters
         ----------
         kind : str, default="spearman"
-            Correlation method. Either "spearman" or "kendall".
+            Correlation method. Supported values are "spearman" and
+            "kendall".
         data : dict
             Layer-wise model data.
         rel_kind : str, default="dual_weights"
-            Parameter groups to compare. One of "dual_weights" or
-            "dual_biases".
+            Parameter groups to compare. Supported values are
+            "dual_weights" and "dual_biases".
 
         Returns
         -------
         list[dict]
-            Correlation coefficient for each layer.
+            Rank correlation result for each layer.
+
+        Raises
+        ------
+        ValueError
+            If an unsupported correlation method or relationship is
+            provided, the parameter groups are empty, the number of
+            layers differs, or corresponding layers contain different
+            numbers of elements.
         """
         x_values = []
         y_values = []
@@ -186,11 +261,36 @@ class Statistical:
                         for value in data[key].values():
                             y_values.append(value)
 
+            case _:
+                raise ValueError(
+                    'Expected rel_kind to be "dual_weights" or "dual_biases".'
+                )
+
+        if not x_values or not y_values:
+            raise ValueError(
+                "Expected data to contain two non-empty parameter groups."
+            )
+
+        if len(x_values) != len(y_values):
+            raise ValueError(
+                "Expected both parameter groups to contain the same number of layers."
+            )
+
         match kind:
             case "spearman":
                 for layer, (x_layer, y_layer) in enumerate(
                     zip(x_values, y_values)
                 ):
+                    x_layer = np.asarray(x_layer).ravel()
+                    y_layer = np.asarray(y_layer).ravel()
+
+                    if x_layer.size != y_layer.size:
+                        raise ValueError(
+                            f"Expected corresponding layers to contain the "
+                            f"same number of elements. Layer {layer} contains "
+                            f"{x_layer.size} and {y_layer.size} elements."
+                        )
+
                     correlation = spearmanr(x_layer, y_layer)
 
                     result.append(
@@ -206,6 +306,16 @@ class Statistical:
                 for layer, (x_layer, y_layer) in enumerate(
                     zip(x_values, y_values)
                 ):
+                    x_layer = np.asarray(x_layer).ravel()
+                    y_layer = np.asarray(y_layer).ravel()
+
+                    if x_layer.size != y_layer.size:
+                        raise ValueError(
+                            f"Expected corresponding layers to contain the "
+                            f"same number of elements. Layer {layer} contains "
+                            f"{x_layer.size} and {y_layer.size} elements."
+                        )
+
                     correlation = kendalltau(x_layer, y_layer)
 
                     result.append(
@@ -216,6 +326,11 @@ class Statistical:
                     )
 
                 return result
+
+            case _:
+                raise ValueError(
+                    'Expected kind to be "spearman" or "kendall".'
+                )
 
     def anova(self, *, data):
         """
@@ -236,20 +351,31 @@ class Statistical:
 
     def linear_regression(self, *, data, kind="dual_weights"):
         """
-        Perform linear regression for corresponding layers.
+        Perform linear regression between corresponding layers.
+
+        Each layer is flattened independently before regression is
+        calculated, allowing N-dimensional layer arrays to be analyzed
+        while preserving layer boundaries.
 
         Parameters
         ----------
         data : dict
             Layer-wise model data.
         kind : str, default="dual_weights"
-            Parameter groups to compare. One of "dual_weights" or
-            "dual_biases".
+            Parameter groups to compare. Supported values are
+            "dual_weights" and "dual_biases".
 
         Returns
         -------
         list[dict]
-            Regression result for each layer.
+            Linear regression result for each layer.
+
+        Raises
+        ------
+        ValueError
+            If no layer data is provided, the number of layers differs
+            between parameter groups, or corresponding layers contain
+            different numbers of elements.
         """
         x_values = []
         y_values = []
@@ -274,21 +400,41 @@ class Statistical:
                         for value in data[key].values():
                             y_values.append(value)
 
-        if isinstance(x_values[0], np.ndarray) and isinstance(x_values[1],np.ndarray):
-            for layer, (x_layer, y_layer) in enumerate(
-                zip(x_values, y_values)
-            ):
-                regression_result = linregress(x_layer, y_layer)
-
-                result.append(
-                    {
-                        "layer": layer,
-                        "Result_value": regression_result,
-                    }
+            case _:
+                raise ValueError(
+                    'Expected kind to be "dual_weights" or "dual_biases".'
                 )
-        else:
+
+        if not x_values or not y_values:
             raise ValueError(
-                "Expected at least two layers of array data."
+                "Expected data to contain two non-empty parameter groups."
+            )
+
+        if len(x_values) != len(y_values):
+            raise ValueError(
+                "Expected both parameter groups to contain the same number of layers."
+            )
+
+        for layer, (x_layer, y_layer) in enumerate(
+            zip(x_values, y_values)
+        ):
+            x_layer = np.asarray(x_layer).ravel()
+            y_layer = np.asarray(y_layer).ravel()
+
+            if x_layer.size != y_layer.size:
+                raise ValueError(
+                    f"Expected corresponding layers to contain the same "
+                    f"number of elements. Layer {layer} contains "
+                    f"{x_layer.size} and {y_layer.size} elements."
+                )
+
+            regression_result = linregress(x_layer, y_layer)
+
+            result.append(
+                {
+                    "layer": layer,
+                    "Result_value": regression_result,
+                }
             )
 
         return result
