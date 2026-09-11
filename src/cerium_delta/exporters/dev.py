@@ -2,7 +2,7 @@ from ..meterics.brain import NVS
 import onnx
 from onnx import numpy_helper, helper, TensorProto
 from numpy.typing import NDArray
-
+from typing import Literal
 class bridge:
     """Bridge class for converting framework-specific model metadata into one common format.
 
@@ -21,7 +21,7 @@ class bridge:
     weights, biases, trained parameters, and epoch information without needing to know which
     framework produced the data.
     """
-    def __init__(self,model:object,*,framework:str,compute_choice:str="lcs",epoch:int=0,device:str="cpu",max_loop:int=500,save_model:str|None=None,optimizer:object|None=None)->None:
+    def __init__(self,model:object,*,framework:Literal["torch","tensorflow","sklearn","jax"],compute_choice:Literal["lcs","sensitivity","evolution","all","lcs_bias","lcs_weight","sensitivity_weight","evolution_bias","evolution_weight","sensitivity_bias"]="lcs",max_loop:int=500,epoch:int=0,device:str="cpu",save_model:str|None=None,optimizer:object|None=None)->None:
         """Initialize the bridge with the model, framework, and training metadata.
 
         Parameters
@@ -220,7 +220,6 @@ class bridge:
         """
 
         onnx_tensor = numpy_helper.from_array(arr, name=name_arr)
-        
         graph = helper.make_graph(
             nodes=[], # no computation
             name="save_array_only",
@@ -230,11 +229,8 @@ class bridge:
             ],
             initializer=[onnx_tensor] 
         )
-        
         model = helper.make_model(graph)
         onnx.save(model, output_path)
-        
-        return None
 
     def torch_parameters_classifier(self,name,parameters,reference="current")->object:
         """Route a PyTorch parameter name into the weights or bias storage bucket.
@@ -253,11 +249,9 @@ class bridge:
             else:
                 return None
         else:
-            
             if name.endswith(".weight"):
                             self.nvs_memory["weights_train"][f"layer {self.layer_train.get("torch_weight_index",0)}"] = parameters
                             self.layer_train["torch_weight_index"]+=1
-                
             elif name.endswith(".bias"):
                             self.nvs_memory["bias_train"][f"layer {self.layer_train.get("torch_bias_index",0)}"] = parameters
                             self.layer_train["torch_bias_index"]+=1
@@ -265,7 +259,6 @@ class bridge:
                 return None
 
         return None
-        
     def tensorflow_parameters_classifier(self,name,parameters,reference="current")->object:
         """Route TensorFlow variable names into the shared weights/bias buckets.
 
@@ -274,23 +267,18 @@ class bridge:
         dictionary with a fresh index each time.
         """
         if reference=="current":
-            
             if "kernel" in name.lower():
                 self.nvs_memory["weights"][f"layer {self.layer_current.get("tensorflow_weight_index",0)}"] = parameters
                 self.layer_current["tensorflow_weight_index"]+=1
-                
             elif "bias" in name.lower():
                 self.nvs_memory["bias"][f"layer {self.layer_current.get("tensorflow_bias_index",0)}"] = parameters
                 self.layer_current["tensorflow_bias_index"]+=1
-                
             else:
                 return None
         else:
-            
            if "kernel" in name.lower():
                            self.nvs_memory["weights_train"][f"layer {self.layer_train.get("tensorflow_weight_index",0)}"] = parameters
                            self.layer_train["tensorflow_weight_index"]+=1
-               
            elif "bias" in name.lower():
                            self.nvs_memory["bias_train"][f"layer {self.layer_train.get("tensorflow_bias_index",0)}"] = parameters
                            self.layer_train["tensorflow_bias_index"]+=1
@@ -317,13 +305,10 @@ class bridge:
 
         if layer_idx is not None:
             layer_name = f"layer {layer_idx}"
-            
         else:
             layer_name = "layer0"
-            
             if "." in name:
                 candidate = name.split(".")[0]
-                
                 if candidate.startswith("layer"):
                     layer_name = candidate
 
