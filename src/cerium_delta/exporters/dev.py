@@ -1,4 +1,4 @@
-from ..meterics.brain import NVS
+from ..metrics.brain import NVS
 from numpy.typing import NDArray
 from typing import Literal
 class bridge:
