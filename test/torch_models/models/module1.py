@@ -7,7 +7,7 @@ import math
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-df= pd.read_csv("Gk_questions.csv")
+df= pd.read_csv("https://raw.githubusercontent.com/NEURAL-Y/Cerium-Delta/main/test/torch_models/datasets/Gk_questions.csv")
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 # Using a pre-trained tokenizer
