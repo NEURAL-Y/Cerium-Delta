@@ -15,10 +15,10 @@ Bridge
     to extract model information from supported ML frameworks.
 """
 
-from .meterics.brain import NVS
+from .metrics.brain import NVS
 from .exporters.dev import bridge
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 __all__ = [
     "NVS",
