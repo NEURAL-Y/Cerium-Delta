@@ -7,8 +7,8 @@
 **Beyond visualization. Toward measurable neural architecture behavior.**
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-cyan.svg)](https://github.com/NEURAL-Y/cerium-delta/blob/main/LICENSE)
+[![release](https://img.shields.io/badge/release-v1.0.1-orange)](https://github.com/NEURAL-Y/cerium-delta/releases/tag/v1.0.1)
 [![release](https://img.shields.io/badge/release-v1.0.0-orange)](https://github.com/NEURAL-Y/cerium-delta/releases/tag/v1.0.0)
-[![pre-release](https://img.shields.io/badge/pre--release-v1.1.0-cyan)](https://github.com/NEURAL-Y/cerium-delta/releases/tag/v1.1.0)
 [![status](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-shimmer.svg)](https://cerium-delta.pages.dev)
 ![paper](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-paper.svg)
 [![architecture](https://img.shields.io/badge/architecture-Cerium%20Delta-1f6feb)](https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/ARCHITECTURE.md)
