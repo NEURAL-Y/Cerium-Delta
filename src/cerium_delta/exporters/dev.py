@@ -1,6 +1,7 @@
 from ..metrics.brain import NVS
 from numpy.typing import NDArray
 from typing import Literal
+import numpy as np
 class bridge:
     """Bridge class for converting framework-specific model metadata into one common format.
 
@@ -218,18 +219,23 @@ class bridge:
         """
         import onnx
         from onnx import numpy_helper, helper, TensorProto
+        arr = np.asarray(arr, dtype=np.float32)
+
         onnx_tensor = numpy_helper.from_array(arr, name=name_arr)
+        
         graph = helper.make_graph(
-            nodes=[], # no computation
+            nodes=[],
             name="save_array_only",
-            inputs=[], # nothing to feed at runtime
+            inputs=[],
             outputs=[
-                helper.make_tensor_value_info(name_arr, TensorProto.FLOAT, arr.shape)
+                helper.make_tensor_value_info(
+                    name_arr,
+                    TensorProto.FLOAT,
+                    list(arr.shape)
+                )
             ],
-            initializer=[onnx_tensor] 
-        )
-        model = helper.make_model(graph)
-        onnx.save(model, output_path)
+            initializer=[onnx_tensor]
+)
 
     def torch_parameters_classifier(self,name,parameters,reference="current")->object:
         """Route a PyTorch parameter name into the weights or bias storage bucket.
