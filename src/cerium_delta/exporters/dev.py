@@ -1,6 +1,4 @@
 from ..meterics.brain import NVS
-import onnx
-from onnx import numpy_helper, helper, TensorProto
 from numpy.typing import NDArray
 from typing import Literal
 class bridge:
@@ -218,7 +216,8 @@ class bridge:
         name_arr : str
             Name to assign to the ONNX tensor corresponding to the NumPy array.
         """
-
+        import onnx
+        from onnx import numpy_helper, helper, TensorProto
         onnx_tensor = numpy_helper.from_array(arr, name=name_arr)
         graph = helper.make_graph(
             nodes=[], # no computation
