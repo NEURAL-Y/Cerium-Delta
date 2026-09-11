@@ -2,6 +2,8 @@ from ..metrics.brain import NVS
 from numpy.typing import NDArray
 from typing import Literal
 import numpy as np
+
+
 class bridge:
     """Bridge class for converting framework-specific model metadata into one common format.
 
@@ -17,212 +19,280 @@ class bridge:
     - compute_choice: the scoring mode selected for NVS computation.
 
     The bridge keeps the final output dictionary consistent so downstream code can read
-    weights, biases, trained parameters, and epoch information without needing to know which
-    framework produced the data.
+    weights, biases, trained parameters, and epoch information without needing to know
+    which framework produced the data.
     """
-    def __init__(self,model:object,*,framework:Literal["torch","tensorflow","sklearn","jax"],compute_choice:Literal["lcs","sensitivity","evolution","all","lcs_bias","lcs_weight","sensitivity_weight","evolution_bias","evolution_weight","sensitivity_bias"]="lcs",max_loop:int=500,epoch:int=0,device:str="cpu",save_model:str|None=None,optimizer:object|None=None)->None:
-        """Initialize the bridge with the model, framework, and training metadata.
 
-        Parameters
-        ----------
-        model : object
-            Model or parameter object supplied by the selected framework.
-        framework : str
-            Name of the ML framework, such as "torch", "tensorflow", "sklearn", or "jax".
-        compute_choice : str, optional
-            The NVS compute mode selected for analysis.
-        epoch : int, optional
-            Number of completed training epochs.
-        device : str, optional
-            Device used for tensor movement, mostly relevant for PyTorch.
-        save_model : str, optional
-            File path to a saved model or checkpoint.
-        optimizer : object, optional
-            Optimizer object or optimizer state for the framework.
-        """
-        self.framework=framework
-        self.compute_choice=compute_choice
-        self.model=model
-        self.device=device
-        self.epoch=epoch
-        self.save_model=save_model
-        self.optimizer=optimizer
-        self.max_loop=max_loop
-        self.nvs_memory={"weights":{},"weights_train":{},"bias":{},"bias_train":{},"epochs":0,"co_relations_layers":{}}
-    
-    def checker(self)->None:
-        """Choose and initialize the correct converter according to the selected framework.
+    def __init__(
+        self,
+        model: object,
+        *,
+        framework: Literal["torch", "tensorflow", "sklearn", "jax"],
+        compute_choice: Literal[
+            "lcs",
+            "sensitivity",
+            "evolution",
+            "all",
+            "lcs_bias",
+            "lcs_weight",
+            "sensitivity_weight",
+            "evolution_bias",
+            "evolution_weight",
+            "sensitivity_bias",
+        ] = "lcs",
+        max_loop: int = 500,
+        epoch: int = 0,
+        device: str = "cpu",
+        save_model: str | None = None,
+        optimizer: object | None = None,
+    ) -> None:
 
-        This method stores the framework-specific converter in either ``self.convert`` or
-        ``self.convertsk`` depending on the framework type. The actual logic for conversion is
-        delegated to the converter classes rather than being implemented here.
-        """
-        if self.framework=="torch":
-           from .torch_converter import converter_pytorch
-           # PyTorch model parameters are converted through the torch-specific extractor.
-           self.convert=converter_pytorch(model=self.model,optimizer=self.optimizer,epoch=self.epoch,device=self.device,save_model=self.save_model)
+        self.framework = framework
+        self.compute_choice = compute_choice
+        self.model = model
+        self.device = device
+        self.epoch = epoch
+        self.save_model = save_model
+        self.optimizer = optimizer
+        self.max_loop = max_loop
 
-        elif self.framework=="tensorflow":
-            from .tensorflow_converter import converter_tensorflow
-           # TensorFlow variables use the framework's variable naming convention.
-            self.convert=converter_tensorflow(self.model,self.epoch,self.optimizer,self.save_model,self.device)
+        self.nvs_memory = {
+            "weights": {},
+            "weights_train": {},
+            "bias": {},
+            "bias_train": {},
+            "epochs": 0,
+            "co_relations_layers": {},
+        }
 
-        elif self.framework=="sklearn":
-            from .sklearn_converter import converter_sklearn
-           # sklearn models do not use a training optimizer in the same way as deep learning models.
-            self.convertsk=converter_sklearn(self.model,self.save_model)
+    def checker(self) -> None:
+        """Choose and initialize the correct converter according to the selected framework."""
 
-        elif self.framework=="jax":
-            from .jax_converter import converter_jax
-           # JAX models are stored as PyTrees, so the JAX converter extracts named leaves.
-            self.convert=converter_jax(self.model,self.optimizer,self.epoch,self.save_model)
-        else:
-            raise RuntimeError(
-                "FRAMEWORK_FOUND_ERROR : framework is not found in our list please use this framework only from our list [torch,tensorflow,sklearn,jax] \n why we choose only this list read our docs for more information visit our website---> https://cerium-delta.pages.dev"
+        if self.framework == "torch":
+
+            from .torch_converter import converter_pytorch
+
+            self.convert = converter_pytorch(
+                model=self.model,
+                optimizer=self.optimizer,
+                epoch=self.epoch,
+                device=self.device,
+                save_model=self.save_model,
             )
-        
-    def information_extract(self)->dict:
-      """Convert framework-specific extracted values into the common NVS memory layout.
 
-      This method gathers all extracted parameter information from the selected framework,
-      classifies it into the shared weight and bias buckets, and returns a standardized
-      dictionary that downstream analysis code can consume.
+        elif self.framework == "tensorflow":
 
-      Returns
-      -------
-      dict
-          Dictionary containing the following main entries:
+            from .tensorflow_converter import converter_tensorflow
 
-          weights : dict
-              Current weight values grouped by layer.
-          weights_train : dict
-              Trained or saved weight values grouped by layer.
-          bias : dict
-              Current bias values grouped by layer.
-          bias_train : dict
-              Trained or saved bias values grouped by layer.
-          epochs : int
-              Total number of training epochs.
-          co_relations_layers : dict
-              Mapping between each layer label and the original parameter names.
+            self.convert = converter_tensorflow(
+                self.model,
+                self.epoch,
+                self.optimizer,
+                self.save_model,
+                self.device,
+            )
 
-      Notes
-      -----
-      The classification logic remains framework-aware because PyTorch uses ".weight" while
-      TensorFlow and JAX typically use "kernel". Even so, the final storage format is made
-      consistent so the rest of the project can treat all frameworks in the same way.
-      """
-      self.checker()
-      self.nvs_memory={"weights":{},"weights_train":{},"bias":{},"bias_train":{},"epochs":0,"co_relations_layers":{}}
+        elif self.framework == "sklearn":
 
-      self.layer_current={"torch_weight_index":0,"torch_bias_index":0,"tensorflow_bias_index":0,"tensorflow_weight_index":0}
+            from .sklearn_converter import converter_sklearn
 
-      self.layer_train={"torch_weight_index":0,"torch_bias_index":0,"tensorflow_bias_index":0,"tensorflow_weight_index":0}
+            self.convertsk = converter_sklearn(
+                self.model,
+                self.save_model,
+            )
 
-      if self.framework=="sklearn":
-            
-            self.infosk=self.convertsk.extractor_architecture()
+        elif self.framework == "jax":
 
-            for i,(k,v) in enumerate(self.infosk["architecture_parameters"].items()):
+            from .jax_converter import converter_jax
 
-                self.nvs_memory["co_relations_layers"][f"layer {i}"]=k
+            self.convert = converter_jax(
+                self.model,
+                self.optimizer,
+                self.epoch,
+                self.save_model,
+            )
+
+        else:
+
+            raise RuntimeError(
+                "FRAMEWORK_FOUND_ERROR : framework is not found in our list. "
+                "Please use one of [torch, tensorflow, sklearn, jax]. "
+                "Read our documentation for more information: "
+                "https://cerium-delta.pages.dev"
+            )
+
+    def information_extract(self) -> dict:
+        """Convert framework-specific extracted values into the common NVS memory layout."""
+
+        self.checker()
+
+        self.nvs_memory = {
+            "weights": {},
+            "weights_train": {},
+            "bias": {},
+            "bias_train": {},
+            "epochs": 0,
+            "co_relations_layers": {},
+        }
+
+        self.layer_current = {
+            "torch_weight_index": 0,
+            "torch_bias_index": 0,
+            "tensorflow_bias_index": 0,
+            "tensorflow_weight_index": 0,
+        }
+
+        self.layer_train = {
+            "torch_weight_index": 0,
+            "torch_bias_index": 0,
+            "tensorflow_bias_index": 0,
+            "tensorflow_weight_index": 0,
+        }
+
+        if self.framework == "sklearn":
+
+            self.infosk = self.convertsk.extractor_architecture()
+
+            for i, (k, v) in enumerate(
+                self.infosk["architecture_parameters"].items()
+            ):
+
+                self.nvs_memory["co_relations_layers"][f"layer {i}"] = k
 
                 if k.endswith("bias"):
-
-                    self.nvs_memory["bias"][k.removesuffix(" bias")]=v
-
+                    self.nvs_memory["bias"][k.removesuffix(" bias")] = v
                 else:
+                    self.nvs_memory["weights"][k.removesuffix(" weight")] = v
 
-                    self.nvs_memory["weights"][k.removesuffix(" weight")]=v
+            for k, v in self.infosk["training_parameters"].items():
 
-            for k,v in self.infosk["training_parameters"].items():
-                            
-                            if k.endswith("bias"):
+                if k.endswith("bias"):
+                    self.nvs_memory["bias_train"][k.removesuffix(" bias")] = v
+                else:
+                    self.nvs_memory["weights_train"][k.removesuffix(" weight")] = v
 
-                                self.nvs_memory["bias_train"][k.removesuffix(" bias")]=v
+            self.total_step = self.infosk["total_steps"]
+            self.nvs_memory["epochs"] = self.total_step
 
-                            else:
+        else:
 
-                                self.nvs_memory["weights_train"][k.removesuffix(" weight")]=v
+            self.info = self.convert.extractor_architecture()
 
-            self.total_step=self.infosk["total_steps"]
-            self.nvs_memory["epochs"]=self.total_step
+            self.architecture_info = self.info["architecture_parameters"]
+            self.training_info = self.info["training_parameters"]
 
-      else:
-            
-            self.info=self.convert.extractor_architecture()
+            self.total_step = self.info.get(
+                "total_epochs",
+                self.info.get("total_steps", 0),
+            )
 
-            self.architecture_info=self.info["architecture_parameters"]
+            self.nvs_memory["epochs"] = self.total_step
 
-            self.training_info=self.info["training_parameters"]
+            for i, (k, v) in enumerate(self.architecture_info.items()):
 
-            self.total_step=self.info.get("total_epochs", self.info.get("total_steps", 0))
-            self.nvs_memory["epochs"]=self.total_step
+                self.nvs_memory["co_relations_layers"][f"layer {i}"] = k
 
-            
+                if self.framework == "torch":
 
-            for i,(k,v) in enumerate(self.architecture_info.items()):
+                    self.torch_parameters_classifier(
+                        k,
+                        v,
+                        layer_idx=i,
+                    )
 
-                self.nvs_memory["co_relations_layers"][f"layer {i}"]=k
+                elif self.framework == "tensorflow":
 
-                if self.framework=="torch":
+                    self.tensorflow_parameters_classifier(
+                        k,
+                        v,
+                        layer_idx=i,
+                    )
 
-                    self.torch_parameters_classifier(k,v)
+                elif self.framework == "jax":
 
-                elif self.framework=="tensorflow":
+                    self.jax_parameters_classifier(
+                        k,
+                        v,
+                        layer_idx=i,
+                    )
 
-                    self.tensorflow_parameters_classifier(k,v)
+            for k, v in self.training_info.items():
 
-                elif self.framework=="jax":
+                if self.framework == "torch":
 
-                    self.jax_parameters_classifier(k,v)
-            
-            for k,v in self.training_info.items():
-                if self.framework=="torch":
+                    self.torch_parameters_classifier(
+                        k,
+                        v,
+                        reference="train",
+                    )
 
-                    self.torch_parameters_classifier(k,v,"train")
+                elif self.framework == "tensorflow":
 
-                elif self.framework=="tensorflow":
+                    self.tensorflow_parameters_classifier(
+                        k,
+                        v,
+                        reference="train",
+                    )
 
-                    self.tensorflow_parameters_classifier(k,v,"train")
+                elif self.framework == "jax":
 
-                elif self.framework=="jax":
+                    self.jax_parameters_classifier(
+                        k,
+                        v,
+                        reference="train",
+                    )
 
-                    self.jax_parameters_classifier(k,v,"train")
-                    
-      return self.nvs_memory
-    
-    def nvs_export_info(self)->object:
-        self.nvs_mem=self.information_extract()
-        nvs=NVS(self.nvs_mem,self.max_loop)
+        return self.nvs_memory
+
+    def nvs_export_info(self) -> object:
+
+        self.nvs_mem = self.information_extract()
+
+        nvs = NVS(
+            self.nvs_mem,
+            self.max_loop,
+        )
 
         try:
-            
-            self.nvs_result=nvs.compute(self.compute_choice)
+
+            self.nvs_result = nvs.compute(
+                self.compute_choice
+            )
+
             return self.nvs_result
 
         except Exception as e:
-           raise RuntimeError(f"File_caught_bug : there is something which struck the operations {e} \n you can report us on --> https://cerium-delta.pages.dev/feedback")
 
-    def pyarr_to_onnx(self,*,arr:NDArray,output_path:str,name_arr:str)->None:
+            raise RuntimeError(
+                "File_caught_bug : there is something which struck "
+                f"the operations {e}\n"
+                "You can report us on --> "
+                "https://cerium-delta.pages.dev/feedback"
+            )
 
-        """Convert a NumPy array into an ONNX model containing only that array.
-        
-        Parameters
-        ----------
-        arr : NDArray
-            NumPy array to be converted into an ONNX initializer.
-        output_path : str
-            File path where the ONNX model will be saved.
-        name_arr : str
-            Name to assign to the ONNX tensor corresponding to the NumPy array.
-        """
+    def pyarr_to_onnx(
+        self,
+        *,
+        arr: NDArray,
+        output_path: str,
+        name_arr: str,
+    ) -> None:
+
+        """Convert a NumPy array into an ONNX model containing only that array."""
+
         import onnx
         from onnx import numpy_helper, helper, TensorProto
-        arr = np.asarray(arr, dtype=np.float32)
 
-        onnx_tensor = numpy_helper.from_array(arr, name=name_arr)
-        
+        arr = np.asarray(
+            arr,
+            dtype=np.float32,
+        )
+
+        onnx_tensor = numpy_helper.from_array(
+            arr,
+            name=name_arr,
+        )
+
         graph = helper.make_graph(
             nodes=[],
             name="save_array_only",
@@ -231,98 +301,131 @@ class bridge:
                 helper.make_tensor_value_info(
                     name_arr,
                     TensorProto.FLOAT,
-                    list(arr.shape)
+                    list(arr.shape),
                 )
             ],
-            initializer=[onnx_tensor]
-)
+            initializer=[
+                onnx_tensor
+            ],
+        )
 
-    def torch_parameters_classifier(self,name,parameters,reference="current")->object:
-        """Route a PyTorch parameter name into the weights or bias storage bucket.
+        model = helper.make_model(
+            graph
+        )
 
-        The logic keeps each layer grouped under the same layer label instead of resetting
-        the index on every parameter call. This preserves the original bridge behavior while
-        keeping the weight and bias entries attached to the same layer.
-        """
-        if reference=="current":
+        onnx.save(
+            model,
+            output_path,
+        )
+
+    def torch_parameters_classifier(
+        self,
+        name,
+        parameters,
+        reference="current",
+        layer_idx=None,
+    ) -> None:
+
+        if layer_idx is None:
+            layer_idx = 0
+
+        layer_name = f"layer {layer_idx}"
+
+        if reference == "current":
+
             if name.endswith(".weight"):
-                self.nvs_memory["weights"][f"layer {self.layer_current.get("torch_weight_index",0)}"] = parameters
-                self.layer_current["torch_weight_index"]+=1
+
+                self.nvs_memory["weights"][layer_name] = parameters
+
             elif name.endswith(".bias"):
-                self.nvs_memory["bias"][f"layer {self.layer_current.get("torch_bias_index",0)}"] = parameters
-                self.layer_current["torch_bias_index"]+=1
-            else:
-                return None
+
+                self.nvs_memory["bias"][layer_name] = parameters
+
         else:
+
             if name.endswith(".weight"):
-                            self.nvs_memory["weights_train"][f"layer {self.layer_train.get("torch_weight_index",0)}"] = parameters
-                            self.layer_train["torch_weight_index"]+=1
+
+                self.nvs_memory["weights_train"][layer_name] = parameters
+
             elif name.endswith(".bias"):
-                            self.nvs_memory["bias_train"][f"layer {self.layer_train.get("torch_bias_index",0)}"] = parameters
-                            self.layer_train["torch_bias_index"]+=1
-            else:
-                return None
 
-        return None
-    def tensorflow_parameters_classifier(self,name,parameters,reference="current")->object:
-        """Route TensorFlow variable names into the shared weights/bias buckets.
+                self.nvs_memory["bias_train"][layer_name] = parameters
 
-        TensorFlow uses "kernel" for weights and "bias" for bias terms. The layer-aware
-        grouping keeps the data attached to the correct layer instead of overwriting the
-        dictionary with a fresh index each time.
-        """
-        if reference=="current":
+    def tensorflow_parameters_classifier(
+        self,
+        name,
+        parameters,
+        reference="current",
+        layer_idx=None,
+    ) -> None:
+
+        if layer_idx is None:
+            layer_idx = 0
+
+        layer_name = f"layer {layer_idx}"
+
+        if reference == "current":
+
             if "kernel" in name.lower():
-                self.nvs_memory["weights"][f"layer {self.layer_current.get("tensorflow_weight_index",0)}"] = parameters
-                self.layer_current["tensorflow_weight_index"]+=1
-            elif "bias" in name.lower():
-                self.nvs_memory["bias"][f"layer {self.layer_current.get("tensorflow_bias_index",0)}"] = parameters
-                self.layer_current["tensorflow_bias_index"]+=1
-            else:
-                return None
-        else:
-           if "kernel" in name.lower():
-                           self.nvs_memory["weights_train"][f"layer {self.layer_train.get("tensorflow_weight_index",0)}"] = parameters
-                           self.layer_train["tensorflow_weight_index"]+=1
-           elif "bias" in name.lower():
-                           self.nvs_memory["bias_train"][f"layer {self.layer_train.get("tensorflow_bias_index",0)}"] = parameters
-                           self.layer_train["tensorflow_bias_index"]+=1
-           else:
-                return None
 
-        return None
-    
+                self.nvs_memory["weights"][layer_name] = parameters
+
+            elif "bias" in name.lower():
+
+                self.nvs_memory["bias"][layer_name] = parameters
+
+        else:
+
+            if "kernel" in name.lower():
+
+                self.nvs_memory["weights_train"][layer_name] = parameters
+
+            elif "bias" in name.lower():
+
+                self.nvs_memory["bias_train"][layer_name] = parameters
+
     def jax_parameters_classifier(
         self,
         name,
         parameters,
         reference="current",
-        layer_idx=None
+        layer_idx=None,
     ) -> None:
-        """Route JAX parameter names into the common weights/bias buckets.
-
-        JAX names usually follow the TensorFlow convention, such as "layer1.kernel" and
-        "layer1.bias". This keeps the same weighted/bias split while maintaining the correct
-        layer grouping.
-        """
 
         name = str(name).lower()
 
         if layer_idx is not None:
+
             layer_name = f"layer {layer_idx}"
+
         else:
-            layer_name = "layer0"
+
+            layer_name = "layer 0"
+
             if "." in name:
+
                 candidate = name.split(".")[0]
+
                 if candidate.startswith("layer"):
+
                     layer_name = candidate
 
-        target_key = "weights" if reference == "current" else "weights_train"
-        bias_key = "bias" if reference == "current" else "bias_train"
+        target_key = (
+            "weights"
+            if reference == "current"
+            else "weights_train"
+        )
+
+        bias_key = (
+            "bias"
+            if reference == "current"
+            else "bias_train"
+        )
 
         if "kernel" in name or name.endswith("weight"):
+
             self.nvs_memory[target_key][layer_name] = parameters
 
         if "bias" in name:
-            self.nvs_memory[bias_key][layer_name] = parameters
 
+            self.nvs_memory[bias_key][layer_name] = parameters
