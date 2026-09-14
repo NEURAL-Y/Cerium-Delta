@@ -1,6 +1,6 @@
 ## Complete PyTorch Example
 
-The following example creates a small PyTorch model, trains it, and then analyzes it with Cerium Delta.
+The following example creates a small PyTorch model, trains it, and then analyzes it with Cerium Delta v1.0.1
 
 ### Install dependencies
 
