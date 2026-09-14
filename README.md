@@ -12,6 +12,7 @@
 [![status](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-shimmer.svg)](https://cerium-delta.pages.dev)
 ![paper](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/badge-paper.svg)
 [![architecture](https://img.shields.io/badge/architecture-Cerium%20Delta-1f6feb)](https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/ARCHITECTURE.md)
+[![Quick Start](https://img.shields.io/badge/Quick%20Start-Cerium%20Delta-1f6feb)](https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/quick_start.md)
 [![Development Charter](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/cerium_delta_charter_badge.svg)](https://github.com/NEURAL-Y/cerium-delta/blob/main/docs/Cerium_Delta_Development_Charter.md)
 
 </div>
