@@ -10,16 +10,16 @@ from scipy.stats import (
     skew,
     poisson,
     binom,
-    laplace,
+    laplace
 )
-
+from typing import Literal
 import numpy as np
 
 
 class Statistical:
     """Statistical analysis methods for layer-wise model data."""
 
-    def pearson_correlation(self, *, data, kind="dual_weights"):
+    def pearson_correlation(self, *, data, kind:Literal["dual_weights","dual_biases","non_grouped"]="dual_weights"):
         """
         Calculate Pearson correlation between corresponding layers.
 
@@ -54,10 +54,10 @@ class Statistical:
         match kind:
             case "dual_weights":
                 for key, _ in data.items():
-                    if key == "weights_1":
+                    if key == "weight_1":
                         for _, value in data[key].items():
                             x_values.append(value)
-                    elif key == "weights_2":
+                    elif key == "weight_2":
                         for _, value in data[key].items():
                             y_values.append(value)
 
@@ -69,10 +69,11 @@ class Statistical:
                     elif key == "bias_2":
                         for _, value in data[key].items():
                             y_values.append(value)
-
+            case "non_grouped":
+                pass
             case _:
                 raise ValueError(
-                    'Expected kind to be "dual_weights" or "dual_biases".'
+                    'Expected kind to be "dual_weights" , "dual_biases" or "NON GROUPED".'
                 )
 
         if not x_values or not y_values:
@@ -110,7 +111,7 @@ class Statistical:
 
         return result
 
-    def covariance(self, *, data, kind="dual_weights"):
+    def covariance(self, *, data, kind:Literal["dual_weights","dual_bias"]="dual_weights"):
         """
         Calculate covariance between corresponding layers.
 
@@ -145,10 +146,10 @@ class Statistical:
         match kind:
             case "dual_weights":
                 for key, _ in data.items():
-                    if key == "weights_1":
+                    if key == "weight_1":
                         for _, value in data[key].items():
                             x_values.append(value)
-                    elif key == "weights_2":
+                    elif key == "weight_2":
                         for _, value in data[key].items():
                             y_values.append(value)
 
@@ -245,10 +246,10 @@ class Statistical:
         match rel_kind:
             case "dual_weights":
                 for key in data.keys():
-                    if key == "weights_1":
+                    if key == "weight_1":
                         for value in data[key].values():
                             x_values.append(value)
-                    elif key == "weights_2":
+                    elif key == "weight_2":
                         for value in data[key].values():
                             y_values.append(value)
 
@@ -332,7 +333,7 @@ class Statistical:
                     'Expected kind to be "spearman" or "kendall".'
                 )
 
-    def anova(self, *, data):
+    def anova(self, *, data,kind:Literal["one_way","two_way"]):
         """
         Perform one-way ANOVA across multiple groups.
 
@@ -346,10 +347,17 @@ class Statistical:
         tuple
             F-statistic and p-value.
         """
-        f_statistic, p_value = f_oneway(*data)
-        return f_statistic, p_value
+        f_val=[]
+        p_val=[]
+        match kind:
+            case  "one_way":
+              for k,v in data.items():
+                if k!="sup_title":
+                    f_statistic, p_value = f_oneway(*v.values())
+                    f_val.append
+        return None
 
-    def linear_regression(self, *, data, kind="dual_weights"):
+    def linear_regression(self, *, data):
         """
         Perform linear regression between corresponding layers.
 
@@ -377,67 +385,25 @@ class Statistical:
             between parameter groups, or corresponding layers contain
             different numbers of elements.
         """
-        x_values = []
-        y_values = []
-        result = []
+        parameter_groups = [key for key in ("weights", "biases") if key in data]
+        if len(parameter_groups) != 1:
+            raise ValueError("Expected exactly one of 'weights' or 'biases'.")
 
-        match kind:
-            case "dual_weights":
-                for key in data.keys():
-                    if key == "weights_1":
-                        for value in data[key].values():
-                            x_values.append(value)
-                    elif key == "weights_2":
-                        for value in data[key].values():
-                            y_values.append(value)
+        values = data[parameter_groups[0]]
+        if not hasattr(values, "values"):
+            raise ValueError("Expected the parameter group to be a layer mapping.")
+        if len(values) < 2:
+            raise ValueError("Linear regression requires at least two layers.")
 
-            case "dual_biases":
-                for key in data.keys():
-                    if key == "bias_1":
-                        for value in data[key].values():
-                            x_values.append(value)
-                    elif key == "bias_2":
-                        for value in data[key].values():
-                            y_values.append(value)
+        layer_values = [float(np.asarray(value).mean()) for value in values.values()]
+        layer_positions = np.arange(len(layer_values), dtype=float)
+        regression_result = linregress(layer_positions, layer_values)
+        fitted_values = regression_result.intercept + regression_result.slope * layer_positions
 
-            case _:
-                raise ValueError(
-                    'Expected kind to be "dual_weights" or "dual_biases".'
-                )
-
-        if not x_values or not y_values:
-            raise ValueError(
-                "Expected data to contain two non-empty parameter groups."
-            )
-
-        if len(x_values) != len(y_values):
-            raise ValueError(
-                "Expected both parameter groups to contain the same number of layers."
-            )
-
-        for layer, (x_layer, y_layer) in enumerate(
-            zip(x_values, y_values)
-        ):
-            x_layer = np.asarray(x_layer).ravel()
-            y_layer = np.asarray(y_layer).ravel()
-
-            if x_layer.size != y_layer.size:
-                raise ValueError(
-                    f"Expected corresponding layers to contain the same "
-                    f"number of elements. Layer {layer} contains "
-                    f"{x_layer.size} and {y_layer.size} elements."
-                )
-
-            regression_result = linregress(x_layer, y_layer)
-
-            result.append(
-                {
-                    "layer": layer,
-                    "Result_value": regression_result,
-                }
-            )
-
-        return result
+        return [
+            {"Layer": layer, "Value": value}
+            for layer, value in enumerate(fitted_values)
+        ]
 
     def interquartile_range(self, *, data):
         """
@@ -469,7 +435,14 @@ class Statistical:
         np.ndarray or float
             Median absolute deviation.
         """
-        return median_abs_deviation(data)
+        return {
+            group: {
+                layer: np.asarray(median_abs_deviation(values,axis=None,nan_policy="omit"),dtype=float).item()
+                for layer, values in layers.items()
+            }
+            for group, layers in data.items()
+            if group!="sup_title"
+        }
 
     def kurtosis(self, *, data):
         """
@@ -485,7 +458,47 @@ class Statistical:
         np.ndarray or float
             Kurtosis value.
         """
-        return kurtosis(data)
+        result={}
+        data_x={}
+        data_y={}
+
+        key_map=[]
+        for i in data:
+            if i =="weight_1" or i=="weight_2":
+               key_map.append("weights")
+            else:
+                key_map.append("biases")
+        if key_map[0]=="weights":
+            var_key_1="weight_1"
+            var_key_2="weight_2"
+            result[var_key_1]={}
+            result[var_key_2]={}
+            for k_1,v_1 in data[var_key_1].items():
+                data_x[k_1]=v_1
+            for k_2,v_2 in data[var_key_2].items():
+                data_y[k_2]=v_2
+            for k_sx,v_sx in data_x.items():
+              skew_val=kurtosis(v_sx,axis=None)
+              result[var_key_1][k_sx]=np.asarray(skew_val,dtype=float).item()
+            for k_sy,v_sy in data_y.items():
+                skew_val=kurtosis(v_sy,axis=None)
+                result[var_key_2][k_sy]=np.asarray(skew_val,dtype=float).item()
+        elif key_map[0]=="biases":
+            var_key_1="bias_1"
+            var_key_2="bias_2"
+            result[var_key_1]={}
+            result[var_key_2]={}
+            for k_1,v_1 in data[var_key_1].items():
+                data_y[k_1]=v_1
+            for k_2,v_2 in data[var_key_2].items():
+                data_y[k_2]=v_2
+            for k_sx,v_sx in data_x.items():
+                skew_val=kurtosis(v_sx,axis=None)
+                result[var_key_1][k_sx]=np.asarray(skew_val,dtype=float).item()
+            for k_sy,v_sy in data_y.items():
+                skew_val=kurtosis(v_sy,axis=None)
+                result[var_key_2][k_sy]=np.asarray(skew_val,dtype=float).item()
+        return result
 
     def skewness(self, *, data):
         """
@@ -501,67 +514,44 @@ class Statistical:
         np.ndarray or float
             Skewness value.
         """
-        return skew(data)
+        result={}
+        data_x={}
+        data_y={}
 
-    def poisson_distribution(self, *, data, mu):
-        """
-        Calculate Poisson distribution probabilities and samples.
-
-        Parameters
-        ----------
-        data : array-like
-            Values at which probabilities are evaluated.
-        mu : float
-            Expected number of events.
-
-        Returns
-        -------
-        tuple
-            Poisson CDF, PMF, and random samples.
-        """
-        cdf = poisson.cdf(data, mu)
-        pmf = poisson.pmf(data, mu)
-        samples = poisson.rvs(mu, size=len(data))
-
-        return cdf, pmf, samples
-
-    def binomial_distribution(self, *, data, n, p):
-        """
-        Calculate Binomial distribution probabilities and samples.
-
-        Parameters
-        ----------
-        data : array-like
-            Values at which probabilities are evaluated.
-        n : int
-            Number of trials.
-        p : float
-            Probability of success.
-
-        Returns
-        -------
-        tuple
-            Binomial CDF, PMF, and random samples.
-        """
-        cdf = binom.cdf(data, n, p)
-        pmf = binom.pmf(data, n, p)
-        samples = binom.rvs(n, p, size=len(data))
-
-        return cdf, pmf, samples
-
-    def laplace_fit(self, *, data):
-        """
-        Fit a Laplace distribution to one-dimensional data.
-
-        Parameters
-        ----------
-        data : array-like
-            One-dimensional observations.
-
-        Returns
-        -------
-        tuple
-            Location and scale parameters.
-        """
-        loc, scale = laplace.fit(data)
-        return loc, scale
+        key_map=[]
+        for i in data:
+            if i =="weight_1" or i=="weight_2":
+               key_map.append("weights")
+            else:
+                key_map.append("biases")
+        if key_map[0]=="weights":
+            var_key_1="weight_1"
+            var_key_2="weight_2"
+            result[var_key_1]={}
+            result[var_key_2]={}
+            for k_1,v_1 in data[var_key_1].items():
+                data_x[k_1]=v_1
+            for k_2,v_2 in data[var_key_2].items():
+                data_y[k_2]=v_2
+            for k_sx,v_sx in data_x.items():
+              skew_val=skew(v_sx,axis=None)
+              result[var_key_1][k_sx]=np.asarray(skew_val,dtype=float).item()
+            for k_sy,v_sy in data_y.items():
+                skew_val=skew(v_sy,axis=None)
+                result[var_key_2][k_sy]=np.asarray(skew_val,dtype=float).item()
+        elif key_map[0]=="biases":
+            var_key_1="bias_1"
+            var_key_2="bias_2"
+            result[var_key_1]={}
+            result[var_key_2]={}
+            for k_1,v_1 in data[var_key_1].items():
+                data_y[k_1]=v_1
+            for k_2,v_2 in data[var_key_2].items():
+                data_y[k_2]=v_2
+            for k_sx,v_sx in data_x.items():
+                skew_val=skew(v_sx,axis=None)
+                result[var_key_1][k_sx]=np.asarray(skew_val,dtype=float).item()
+            for k_sy,v_sy in data_y.items():
+                skew_val=skew(v_sy,axis=None)
+                result[var_key_2][k_sy]=np.asarray(skew_val,dtype=float).item()
+        return result
