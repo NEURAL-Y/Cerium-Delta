@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from typing import Literal
-from stats_method import Statistical
+from .stats_method import Statistical
 import datashader as ds
 import datashader.transfer_functions as tf
 
