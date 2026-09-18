@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
-import matplotlib.container as BarContainer
 from typing import cast
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from typing import Literal
+from typing import Literal, Mapping
 from .stats_method import Statistical
 import datashader as ds
 import datashader.transfer_functions as tf
@@ -482,15 +481,72 @@ class visualizer:
         Ordered score/tensor family codes this visualizer indexes into.
     """
 
-    def __init__(self, *, family: list) -> None:
-        """Bind this visualizer to a fixed list of family codes."""
+    def __init__(self, *, family: list, plot_style: Mapping | None = None) -> None:
+        """Bind this visualizer to a fixed list of family codes and plot style."""
         self.family = family
+        self.plot_style = dict(plot_style or {})
+
+    def _style(self, plot_style: Mapping | None = None, **overrides) -> dict:
+        """Merge instance and per-plot styling options."""
+        style = {
+            "context": "notebook",
+            "theme": "whitegrid",
+            "palette": "deep",
+            "fig_size": (9, 5),
+            "dpi": 120,
+            "title_size": 16,
+            "label_size": 11,
+            "tick_rotation": 35,
+            "grid_alpha": 0.25,
+            "despine": True,
+            "show": True,
+        }
+        style.update(self.plot_style)
+        if plot_style:
+            style.update(plot_style)
+        style.update({key: value for key, value in overrides.items() if value is not None})
+        return style
+
+    def _figure(self, plot_style: Mapping | None = None, **overrides):
+        """Create a consistently styled figure and axes."""
+        style = self._style(plot_style, **overrides)
+        sns.set_theme(
+            context=style["context"],
+            style=style["theme"],
+            palette=style["palette"],
+            rc={"grid.alpha": style["grid_alpha"]},
+        )
+        figure, axes = plt.subplots(figsize=style["fig_size"], dpi=style["dpi"])
+        return style, figure, axes
+
+    @staticmethod
+    def _primary_color(style: dict):
+        """Resolve a palette option to one valid matplotlib color."""
+        palette = style["palette"]
+        if isinstance(palette, str):
+            return sns.color_palette(palette, 1)[0]
+        return palette[0] if palette else None
+
+    def _finish(self, axes, style: dict, *, title: str, xlabel: str | None = None, ylabel: str | None = None):
+        """Apply shared labels and layout, then optionally display the figure."""
+        axes.set_title(style.get("title", title), fontsize=style["title_size"], weight="bold", pad=14)
+        if xlabel is not None:
+            axes.set_xlabel(style.get("xlabel", xlabel), fontsize=style["label_size"])
+        if ylabel is not None:
+            axes.set_ylabel(style.get("ylabel", ylabel), fontsize=style["label_size"])
+        axes.tick_params(axis="both", labelsize=style["label_size"] - 1)
+        if style["despine"]:
+            sns.despine(ax=axes)
+        axes.figure.tight_layout()
+        if style["show"]:
+            plt.show()
 
     def bar_plot(
         self, *, family_idx: int = 0, parameters: dict, sens_pad: bool = True,
         choice: Literal["non_grouped", "grouped_biases", "grouped_weights"] = "non_grouped",
-        anot: None | list = None, range: str | None = None, fig_size: tuple = (6, 4),
+        anot: None | list = None, range: str | None = None, fig_size: tuple | None = None,
         orient: Literal["v", "h", "x", "y"] = "v", kind: Literal["normal", "iqr"] = "normal",
+        plot_style: Mapping | None = None,
     ):
         """Plot per-layer ranking scores as a bar chart.
 
@@ -543,30 +599,26 @@ class visualizer:
 
         match choice:
             case "non_grouped":
-                plt.figure(figsize=fig_size)
-                sns.barplot(data=data, x="Layers", y="Scores", orient=orient)
-                plt.title(selected_values["sup_title"])
-                plt.xticks(rotation=45, ha="right")
-                plt.tight_layout()
-                plt.show()
+                style, _, axes = self._figure(plot_style, fig_size=fig_size)
+                sns.barplot(data=data, x="Layers", y="Scores", orient=orient, ax=axes, color=self._primary_color(style))
+                axes.tick_params(axis="x", rotation=style["tick_rotation"])
+                self._finish(axes, style, title=selected_values["sup_title"], xlabel="Layer", ylabel="Score")
 
             case "grouped_weights":
-                plt.figure(figsize=fig_size)
-                sns.barplot(data=data, x="Layers", y="Scores", hue="Group", legend=False)
-                plt.title(selected_values["sup_title"])
-                plt.xticks(rotation=45, ha="right")
-                plt.tight_layout()
-                plt.show()
+                style, _, axes = self._figure(plot_style, fig_size=fig_size)
+                sns.barplot(data=data, x="Layers", y="Scores", hue="Group", palette=style["palette"], ax=axes)
+                axes.legend(title=None, frameon=False)
+                axes.tick_params(axis="x", rotation=style["tick_rotation"])
+                self._finish(axes, style, title=selected_values["sup_title"], xlabel="Layer", ylabel="Score")
 
             case "grouped_biases":
-                plt.figure(figsize=fig_size)
-                sns.barplot(data=data, x="Layers", y="Scores", hue="Group", legend=False)
-                plt.title(selected_values["sup_title"])
-                plt.xticks(rotation=45, ha="right")
-                plt.tight_layout()
-                plt.show()
+                style, _, axes = self._figure(plot_style, fig_size=fig_size)
+                sns.barplot(data=data, x="Layers", y="Scores", hue="Group", palette=style["palette"], ax=axes)
+                axes.legend(title=None, frameon=False)
+                axes.tick_params(axis="x", rotation=style["tick_rotation"])
+                self._finish(axes, style, title=selected_values["sup_title"], xlabel="Layer", ylabel="Score")
 
-    def scatter_plot(self, *, family_index: int = 0, parameters: dict, plot_choice: Literal["covariance", "corelation"], choice: Literal["grouped_bias", "grouped_weight"], sens_pad: bool = True):
+    def scatter_plot(self, *, family_index: int = 0, parameters: dict, plot_choice: Literal["covariance", "corelation"], choice: Literal["grouped_bias", "grouped_weight"], sens_pad: bool = True, plot_style: Mapping | None = None):
         """Plot per-layer Pearson correlation or covariance between two score families.
 
         Parameters
@@ -596,8 +648,10 @@ class visualizer:
                 df = pd.DataFrame(
                     [{"Layer": item["layer"], "Value": item["R_value"]} for item in correlation_results]
                 )
-                sns.scatterplot(data=df, x="Layer", y="Value")
-                plt.show()
+                style, _, axes = self._figure(plot_style)
+                sns.scatterplot(data=df, x="Layer", y="Value", color=self._primary_color(style), s=70, alpha=0.85, ax=axes)
+                axes.tick_params(axis="x", rotation=style["tick_rotation"])
+                self._finish(axes, style, title=selected_values["sup_title"], xlabel="Layer", ylabel="Correlation")
             case "covariance":
                 covariance_results = Statistical().covariance(data=selected_values, kind=pairing_kind)
                 df = pd.DataFrame(
@@ -606,10 +660,12 @@ class visualizer:
                         for item in covariance_results
                     ]
                 )
-                sns.scatterplot(data=df, x="Layer", y="Value")
-                plt.show()
+                style, _, axes = self._figure(plot_style)
+                sns.scatterplot(data=df, x="Layer", y="Value", color=self._primary_color(style), s=70, alpha=0.85, ax=axes)
+                axes.tick_params(axis="x", rotation=style["tick_rotation"])
+                self._finish(axes, style, title=selected_values["sup_title"], xlabel="Layer", ylabel="Covariance")
 
-    def large_dist_plot(self, *, family_index: int = 0, parameters: dict) -> object | None:
+    def large_dist_plot(self, *, family_index: int = 0, parameters: dict, plot_style: Mapping | None = None) -> object | None:
         """Aggregate large per-layer value arrays with Datashader and show a heatmap.
 
         Parameters
@@ -659,22 +715,18 @@ class visualizer:
             cmap=["#000004", "#2c115f", "#721f81", "#b73779", "#f1605d", "#feb078", "#fcfdbf"],
             how="eq_hist",
         )
-        plt.figure(figsize=(12, 6))
-        plt.imshow(image.to_pil(), aspect="auto", origin="lower")
-        plt.title(selected_values.get("sup_title", "Large Distribution"))
-        plt.xlabel("Layer")
-        plt.ylabel("Value")
-        plt.xticks(
+        style, _, axes = self._figure(plot_style, fig_size=(12, 6))
+        axes.imshow(image.to_pil(), aspect="auto", origin="lower")
+        axes.set_xticks(
             np.linspace(0, len(layer_labels) - 1, min(len(layer_labels), 10), dtype=int),
             [layer_labels[index] for index in np.linspace(0, len(layer_labels) - 1, min(len(layer_labels), 10), dtype=int)],
-            rotation=45,
-            ha="right",
+            rotation=style["tick_rotation"],
+            ha="right"
         )
-        plt.tight_layout()
-        plt.show()
+        self._finish(axes, style, title=selected_values.get("sup_title", "Large Distribution"), xlabel="Layer", ylabel="Value")
         return image
 
-    def box_plot(self, *, family_index: int = 0, parameters: dict):
+    def box_plot(self, *, family_index: int = 0, parameters: dict, plot_style: Mapping | None = None):
         """Plot the distribution of element values per layer as a box plot.
 
         Parameters
@@ -700,10 +752,13 @@ class visualizer:
                 for element in np.asarray(layer_values).ravel()
             ]
         )
-        sns.boxplot(data=df, x="Layer", y="Value", hue="Group", legend=False)
-        plt.show()
+        style, _, axes = self._figure(plot_style)
+        sns.boxplot(data=df, x="Layer", y="Value", hue="Group", palette=style["palette"], ax=axes)
+        axes.legend(title=None, frameon=False)
+        axes.tick_params(axis="x", rotation=style["tick_rotation"])
+        self._finish(axes, style, title=selected_values["sup_title"], xlabel="Layer", ylabel="Value")
 
-    def hist_plot(self, *, family_index: int = 0, parameters: dict, kind: Literal["grouped_weight", "grouped_bias"] = "grouped_weight", statistics_method: Literal["skewness", "kurtosis"], bins: int = 30):
+    def hist_plot(self, *, family_index: int = 0, parameters: dict, kind: Literal["grouped_weight", "grouped_bias"] = "grouped_weight", statistics_method: Literal["skewness", "kurtosis"], bins: int = 30, plot_style: Mapping | None = None):
         """Plot per-layer skewness or kurtosis as a histogram.
 
         Parameters
@@ -736,8 +791,10 @@ class visualizer:
                         for layer_name, score in layers.items()
                     ]
                 )
-                sns.histplot(df, x="Layer", y="Value", kde=True, bins=bins)
-                plt.show()
+                style, _, axes = self._figure(plot_style)
+                sns.histplot(df, x="Layer", y="Value", hue="Group", kde=True, bins=bins, palette=style["palette"], ax=axes)
+                axes.tick_params(axis="x", rotation=style["tick_rotation"])
+                self._finish(axes, style, title=f"{selected_values['sup_title']} Kurtosis", xlabel="Layer", ylabel="Kurtosis")
             case "skewness":
                 skewness_results = Statistical().skewness(data=selected_values)
                 df = pd.DataFrame(
@@ -747,10 +804,12 @@ class visualizer:
                         for layer_name, score in layers.items()
                     ]
                 )
-                sns.histplot(df, x="Layer", y="Value", kde=True, bins=bins)
-                plt.show()
+                style, _, axes = self._figure(plot_style)
+                sns.histplot(df, x="Layer", y="Value", hue="Group", kde=True, bins=bins, palette=style["palette"], ax=axes)
+                axes.tick_params(axis="x", rotation=style["tick_rotation"])
+                self._finish(axes, style, title=f"{selected_values['sup_title']} Skewness", xlabel="Layer", ylabel="Skewness")
 
-    def fitting_plot(self, *, family_index: int = 0, parameters: dict):
+    def fitting_plot(self, *, family_index: int = 0, parameters: dict, plot_style: Mapping | None = None):
         """Plot a fitted regression line for the selected layer values.
 
         Parameters
@@ -769,10 +828,12 @@ class visualizer:
         selected_values = obj.fitting_plot_validator(family=self.family, family_idx=family_index, parameter=parameters)
         regression_results = Statistical().linear_regression(data=selected_values)
         regression_df = pd.DataFrame(regression_results)
-        sns.lineplot(data=regression_df, x="Layer", y="Value")
-        plt.show()
+        style, _, axes = self._figure(plot_style)
+        sns.lineplot(data=regression_df, x="Layer", y="Value", marker="o", linewidth=2.5, color=self._primary_color(style), ax=axes)
+        axes.tick_params(axis="x", rotation=style["tick_rotation"])
+        self._finish(axes, style, title=selected_values["sup_title"] + " Fit", xlabel="Layer", ylabel="Fitted Value")
 
-    def mad_plot(self, *, parameters: dict, family_index: int = 0):
+    def mad_plot(self, *, parameters: dict, family_index: int = 0, plot_style: Mapping | None = None):
         """Plot the median-absolute-deviation distribution by score group.
 
         Parameters
@@ -797,5 +858,6 @@ class visualizer:
                 for layer_name, score in layers.items()
             ]
         )
-        sns.kdeplot(data=df, x="Value", hue="Group")
-        plt.show()
+        style, _, axes = self._figure(plot_style)
+        sns.kdeplot(data=df, x="Value", hue="Group", fill=True, alpha=0.25, palette=style["palette"], ax=axes)
+        self._finish(axes, style, title=selected_values["sup_title"] + " MAD Distribution", xlabel="Value", ylabel="Density")
