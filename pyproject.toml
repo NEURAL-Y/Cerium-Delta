@@ -7,12 +7,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cerium-delta"
-version = "1.0.1"
+version = "1.1.0"
 description = "Neural network observability and Neural Vitality analysis toolkit"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
-
 authors = [
     { name = "NEURAL-Y" }
 ]
@@ -27,7 +26,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-
 torch = [
     "torch"
 ]
@@ -43,9 +41,11 @@ jax = [
 sklearn = [
     "scikit-learn"
 ]
-onnx=[
-"onnx"
+
+onnx = [
+    "onnx"
 ]
+
 all = [
     "torch",
     "tensorflow",
@@ -70,7 +70,3 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = [
-    "cerium_delta.visualizers",
-    "cerium_delta.visualizers.*"
-]
