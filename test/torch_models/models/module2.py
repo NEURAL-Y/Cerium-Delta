@@ -210,7 +210,9 @@ def train(model, loader, optimizer, scheduler, epoch):
 # ─────────────────────────────────────────
 if __name__ == "__main__":
     # Load your data
-    with open("kidney.txt", "r") as f:
+    from pathlib import Path
+    dataset_path = Path(__file__).resolve().parent.parent / "datasets" / "kidney.txt"
+    with open(dataset_path, "r") as f:
         text = f.read()
 
     tokenizer  = SimpleTokenizer(text, cfg.vocab_size)
