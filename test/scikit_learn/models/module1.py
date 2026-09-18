@@ -5,6 +5,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, classification_report
 
 # 1. Load dataset from txt
+from pathlib import Path
+dataset_path = Path(__file__).resolve().parent.parent / "datasets" / "test.txt"
 data = np.loadtxt(datasets, skiprows=1)  # skip header
 X = data[:, :3]  # first 3 columns = features
 y = data[:, 3]   # last column = label
