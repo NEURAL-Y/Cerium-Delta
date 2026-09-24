@@ -1,4 +1,4 @@
-```python
+
 """
 Cerium Delta
 ============
@@ -38,4 +38,3 @@ __all__ = [
     "Statistical",
     "__version__",
 ]
-```
