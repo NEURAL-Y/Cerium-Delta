@@ -29,7 +29,7 @@
 > Click the release / pre-release badges above to see what shipped and what's currently in development — each links to demo assets and source for that milestone.
 
 ---
-
+![warning](https://raw.githubusercontent.com/NEURAL-Y/cerium-delta/main/public/cerium-delta-warning.svg)
 ## What Cerium Delta Is
 
 Cerium Delta is **not** a neural-network drawing tool. Most architecture visualizers answer *"what does the model look like?"* — a static diagram, useful for documentation but silent on behavior.
