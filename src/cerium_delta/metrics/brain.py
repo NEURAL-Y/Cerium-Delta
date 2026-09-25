@@ -586,6 +586,19 @@ class NVS:
                 )
 
         return powered
+
+    @staticmethod
+    def _gram_matrix(array: NDArray) -> NDArray:
+        """Return a square Gram matrix for any parameter tensor shape."""
+        array = np.asarray(array, dtype=np.float64)
+        if array.ndim == 0:
+            array = array.reshape(1)
+        if array.ndim == 1:
+            return np.outer(array, array)
+        flattened = array.reshape(array.shape[0], -1)
+        return flattened @ flattened.T
+
+
     def compute_lcs(self) -> dict[str, NDArray]:
         """
         Layer Contribution Score (LCS).
@@ -615,11 +628,11 @@ class NVS:
             Contribution arrays keyed by layer name.
 
         Notes
-        -----
-        The current implementation implicitly assumes that each weight
-        tensor is a 2D array suitable for the ``W @ W.T`` operation.
-        If the model state contains higher-dimensional weights, the method
-        will need to be adapted to compute an appropriate Gram matrix.
+        ------
+        One-dimensional weights are treated as column vectors, and
+        higher-dimensional weights are flattened per first dimension before
+        building their Gram matrix. The original weight shape is preserved
+        for the adaptive transformation.
         """
 
         self.lcs = {}
@@ -631,8 +644,8 @@ class NVS:
 
             weight = weight.astype(np.float64)
 
-            # Gram matrix
-            matrix = weight @ weight.T
+            # Build a square Gram matrix for vectors, matrices, and tensors.
+            matrix = self._gram_matrix(weight)
 
             # Dominant eigenvalue
             eigenvalues = np.linalg.eigvalsh(matrix)
@@ -705,7 +718,7 @@ class NVS:
         self.layer_powers=[]
         layers = list(x.keys())
         for v in x.values():
-            gram = v.T @ v
+            gram = self._gram_matrix(v)
             eig = np.linalg.eigvalsh(gram)
 
             spectral = np.sqrt(np.max(np.abs(eig)))
@@ -729,10 +742,13 @@ class NVS:
                     p=p_next,
                     weight=next_weight
                 )
-                sensitivity = np.linalg.norm(
-                                    np.outer(jac_powered,current_weight)
-                                )
-                self.sensitivity_score["raw_values"][layers[i]]=np.outer(jac_powered,current_weight)
+                # ||outer(a, b)||_F equals ||a||_2 * ||b||_2. Avoid
+                # materializing the potentially enormous outer product.
+                sensitivity = (
+                    np.linalg.norm(jac_powered.ravel())
+                    * np.linalg.norm(current_weight.ravel())
+                )
+                self.sensitivity_score["raw_values"][layers[i]] = sensitivity
                 self.sensitivity_score["norm_values"][layers[i]] = sensitivity
             except Exception as e: 
                 raise RuntimeError(
@@ -942,10 +958,7 @@ class NVS:
             b = b.astype(np.float64)
 
             # Make square matrix for eigenvalue calculation
-            if b.ndim == 2:
-                matrix = b @ b.T
-            else:
-                matrix = np.outer(b, b)
+            matrix = self._gram_matrix(b)
 
             eigenvalues = np.linalg.eigvalsh(matrix)
             lambda_max = np.max(np.abs(eigenvalues))
@@ -1018,11 +1031,7 @@ class NVS:
         layers = list(x.keys())
 
         for v in x.values():
-
-            if v.ndim == 2:
-                gram = v @ v.T
-            else:
-                gram = np.outer(v, v)
+            gram = self._gram_matrix(v)
 
             eig = np.linalg.eigvalsh(gram)
 
@@ -1049,11 +1058,14 @@ class NVS:
                     weight=next_bias,
                 )
 
-                sensitivity = np.linalg.norm(
-                    np.outer(jac_powered,current_bias)
+                # Keep the equivalent Frobenius norm without allocating a
+                # dense outer product for large bias tensors.
+                sensitivity = (
+                    np.linalg.norm(jac_powered.ravel())
+                    * np.linalg.norm(current_bias.ravel())
                 )
-                
-                self.sensitivity_score_bias["raw_values"][layers[i]]=np.outer(jac_powered,current_bias)
+
+                self.sensitivity_score_bias["raw_values"][layers[i]] = sensitivity
                 self.sensitivity_score_bias["norm_values"][layers[i]]=sensitivity
             except Exception as e:
                 raise RuntimeError(
@@ -1116,7 +1128,7 @@ class NVS:
                 )
                else:
                    self.evolution_scores_bias["raw_values"][k] = (
-                                       (trained_bias[k] - reference_bias[k])
+                                       trained_bias[k] - reference_bias[k]
                                    )
                    self.evolution_scores_bias["norm_values"][k] = (
                                        np.linalg.norm(trained_bias[k] - reference_bias[k])
