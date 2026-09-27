@@ -10,9 +10,8 @@ class converter_sklearn:
             Attributes 
             ---------- 
             model Stores the scikit-learn MLP model. save_model Stores the path to the saved model or parameter file."""
-    def __init__(self,model,save_model=None)->None:
+    def __init__(self,model)->None:
         self.model=model
-        self.save_model=save_model
     def extractor_architecture(self)->dict:
         """ Extract model parameters and training information. 
 
@@ -40,23 +39,4 @@ class converter_sklearn:
         self.culter["total_layer"]=index
 
         self.culter["total_steps"]=self.model.n_iter_
-
-        if self.save_model is not None:
-            self.save_model=str(self.save_model)
-            weights=joblib.load(self.save_model)
-
-            if isinstance(weights,dict):
-
-                for k,v in weights.items():
-
-                    self.culter["training_parameters"][k]=numpy.asarray(v).copy()
-
-            elif isinstance(weights,list):
-                for i, weight in enumerate(weights):
-                    self.culter["training_parameters"][f"layer {i} weights"] = numpy.asarray(weight).copy()
-            else:
-                raise RuntimeError("save_model_standard_error : you use wrong standard to save your model weights and biases it should be in a list or a dictionary type learn more about--> https://cerium-delta.pages.dev ")
-        else:
-            self.save_model=None
-            
         return self.culter
