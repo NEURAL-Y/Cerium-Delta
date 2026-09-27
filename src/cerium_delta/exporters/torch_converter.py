@@ -17,41 +17,31 @@ class converter_pytorch:
       ----- 
       Model parameters and optimizer state are intentionally stored separately because they represent different aspects of training. Model parameters describe the learned state of the neural network, while optimizer state may contain quantities such as momentum, exponential moving averages, variance estimates, and optimization steps.
     """
-    def __init__(self,model,epoch,device="cpu",optimizer=None,save_model=None)->None:
+    def __init__(self,*,epoch:int,model:object,optimizer=None,model_test:object|None=None)->None:
 
         self.model=model
         self.optimizer=optimizer
-        self.device=device
-        self.epoch=epoch
-        self.save_model=save_model  
+        self.epoch=epoch  
+        self.model_test=model_test
 
     def extractor_architecture(self)->dict:
-       """ Extract model parameters, optimizer state, and training metadata. 
+      """ Extract model parameters, optimizer state, and training metadata. 
          Returns
          ------- 
          dict Dictionary containing the extracted information. """
-       self.culter={"architecture_parameters":{},"training_parameters":{},"total_layer":0,"total_epochs":0}
+      self.culter={"architecture_parameters":{},"training_parameters":{},"total_layer":0,"total_epochs":0}
 
-       i=0
-
-       for name,param in self.model.named_parameters():
-         
-         self.culter["architecture_parameters"][name] = param.detach().cpu().numpy().copy()
-         i+=1
-       self.culter["total_layer"]=i
-       self.culter["total_epochs"]=self.epoch
-       if self.optimizer is not None:
+      i=0
+      for name,param in self.model.named_parameters():
+            
+            self.culter["architecture_parameters"][name] = param.detach().cpu().numpy().copy()
+            i+=1
+      self.culter["total_layer"]=i
+      self.culter["total_epochs"]=self.epoch
+      if self.optimizer is not None:
           self.culter["optimizer"]=self.optimizer.state_dict()
-       else:
+      else:
           self.culter["optimizer"]=None
-
-       if self.save_model is not None:
-          self.save_model=str(self.save_model)
-          state=torch.load(self.save_model,map_location=self.device)
-
-          for k,v in state.items():
-             self.culter["trained_parameters"][k]=v.detach().cpu().numpy().copy()
-       else:
-          self.save_model=None
-          
-       return self.culter
+      for name,param in self.model_test.named_parameters():
+          self.culter["training_parameters"][name]=param.detach().cpu().numpy().copy()
+      return self.culter
