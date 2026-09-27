@@ -12,12 +12,11 @@ class converter_tensorflow:
     ---------- 
     model Stores the TensorFlow/Keras model. optimizer Stores the optimizer associated with the model. epoch Stores the number of completed training epochs. save_model Stores the path of the saved trained model. device Stores the device configuration.
     """
-    def __init__(self,model,epoch,optimizer=None,save_model=None,device="cpu")->None:
+    def __init__(self,*,model:object,epoch:int,optimizer=None,model_test:object|None=None)->None:
         self.model=model
         self.optimizer=optimizer
-        self.save_model=save_model
-        self.device=device
         self.epoch=epoch
+        self.model_test=model_test
 
     def extractor_architecture(self)->dict:
         """Extract model variables, optimizer state, and trained variables. 
@@ -46,25 +45,6 @@ class converter_tensorflow:
                 self.culter["optimizer"][i.name]=i.numpy().copy()
         else:
             self.culter["optimizer"]=None
-
-        if self.save_model is not None:
-
-            if tf.config.list_physical_devices(self.device):
-               device="/GPU:0"
-            else:
-                device = "/CPU:0"
-
-            self.save_model=str(self.save_model)
-
-            with tf.device(device):
-
-                model = tf.keras.models.load_model(self.save_model)
-
-            for var in model.variables:
-
-                self.culter["training_parameters"][var.name]=var.numpy().copy()
-        else:
-            
-            self.save_model=None
-
+        for i in self.model_test:
+            self.culter["training_parameters"][i.name]=i.numpy().copy()
         return self.culter
