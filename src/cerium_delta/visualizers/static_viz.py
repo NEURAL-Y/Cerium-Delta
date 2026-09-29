@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from typing import cast
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -7,7 +6,7 @@ from typing import Literal, Mapping
 from .stats_method import Statistical
 import datashader as ds
 import datashader.transfer_functions as tf
-
+from scipy.stats import percentileofscore
 
 class controller:
     """Parameter-preparation utilities shared by all validators.
@@ -19,6 +18,54 @@ class controller:
     def __init__(self):
         """Initialize an empty result cache."""
         self.control_memory = {}
+
+    @staticmethod
+    def _metric_values(parameters: dict, metric: str, parameter_type: str, statistic: str = "raw") -> dict:
+        """Return one metric's layer values across current and legacy NVS layouts."""
+        if not isinstance(parameters, dict):
+            return {}
+
+        section = parameters.get(metric, {})
+        group_name = "biases" if parameter_type == "biases" else "weights"
+        group = section.get(group_name, {}) if isinstance(section, dict) else {}
+        if not isinstance(group, dict):
+            group = {}
+
+        if metric == "layer_contribution_score":
+            filtered_name = f"filtered_layers_{group_name}"
+            filtered = group.get(filtered_name, {})
+            if statistic == "raw":
+                return {key: value for key, value in group.items() if key != filtered_name and not isinstance(value, dict)}
+            if not isinstance(filtered, dict):
+                return {}
+            if statistic == "norm":
+                return filtered.get("norm_values", {})
+            if statistic == "rank":
+                rank_name = "ranks_biases" if group_name == "biases" else "ranks_weights"
+                return filtered.get(rank_name, {})
+            if statistic == "coefficient_of_variation":
+                return {
+                    key: value for key, value in filtered.items()
+                    if key not in {"norm_values", "ranks_weights", "ranks_biases"}
+                    and not isinstance(value, dict)
+                }
+            return {}
+
+        statistic_name = {
+            "raw": "raw_values",
+            "norm": "norm_values",
+            "rank": "ranks_biases" if group_name == "biases" else "ranks_weights",
+        }.get(statistic)
+        if statistic_name is None:
+            return {}
+        if statistic_name in group and isinstance(group[statistic_name], dict):
+            return group[statistic_name]
+
+        # Support older outputs where score dictionaries were not grouped by
+        # parameter type. Do not confuse a grouped current-format result.
+        legacy_group = section if isinstance(section, dict) else {}
+        values = legacy_group.get(statistic_name, {})
+        return values if isinstance(values, dict) else {}
 
     def sudo_control(self, *, sens_pad: bool = False, parameters: dict | None, diff_params: dict | None = None) -> dict | object:
         """Pad sensitivity layers or split parameters into train/test groups.
@@ -49,27 +96,30 @@ class controller:
                     "weights": {"norm_values": {}, "raw_values": {}, "ranks_weights": {}},
                     "biases": {"norm_values": {}, "raw_values": {}, "ranks_weights": {}, "ranks_biases": {}},
                 }
-                weight_norm_values = [v for v in parameters["sensitivity_score"]["weights"]["norm_values"].values()]
-                bias_norm_values = [v for v in parameters["sensitivity_score"]["biases"]["norm_values"].values()]
-                weight_mean = np.mean(weight_norm_values)
-                bias_mean = np.mean(bias_norm_values)
-                weight_median = np.median(weight_norm_values)
-                bias_median = np.median(bias_norm_values)
-                final_layer_key = list(parameters["sensitivity_score"]["weights"]["norm_values"].keys())[-1]
+                for parameter_type in ("weights", "biases"):
+                    norm_values = self._metric_values(
+                        parameters, "sensitivity_score", parameter_type, "norm"
+                    )
+                    raw_values = self._metric_values(
+                        parameters, "sensitivity_score", parameter_type, "raw"
+                    )
+                    ranks = self._metric_values(
+                        parameters, "sensitivity_score", parameter_type, "rank"
+                    )
+                    padded_group = padded_sensitivity[parameter_type]
+                    padded_group["norm_values"].update(norm_values)
+                    padded_group["raw_values"].update(raw_values)
+                    rank_name = "ranks_biases" if parameter_type == "biases" else "ranks_weights"
+                    padded_group[rank_name].update(ranks)
 
-                for layer_name, layer_values in parameters["sensitivity_score"]["weights"]["norm_values"].items():
-                    padded_sensitivity["weights"]["norm_values"][layer_name] = layer_values
-                    if layer_name == final_layer_key:
-                        padded_sensitivity["weights"]["raw_values"]["forced_layer"] = np.full(layer_values.shape, np.float64((weight_mean / weight_median)))
-                        padded_sensitivity["weights"]["ranks_weights"]["forced_layer"] = np.float64(weight_mean * 100)
-                        padded_sensitivity["weights"]["norm_values"]["forced_layer"] = np.full(layer_values.shape, np.float64((weight_mean / weight_median)))
-
-                for layer_name, layer_values in parameters["sensitivity_score"]["biases"]["norm_values"].items():
-                    padded_sensitivity["biases"]["norm_values"][layer_name] = layer_values
-                    if layer_name == final_layer_key:
-                        padded_sensitivity["biases"]["raw_values"]["forced_layer"] = np.full(layer_values.shape, np.float64((bias_mean / bias_median)))
-                        padded_sensitivity["biases"]["ranks_biases"]["forced_layer"] = np.float64((bias_mean / bias_median) * 100)
-                        padded_sensitivity["biases"]["norm_values"]["forced_layer"] = np.full(layer_values.shape, np.float64((bias_mean / bias_median)))
+                    if norm_values:
+                        values = np.asarray(list(norm_values.values()), dtype=float)
+                        mean_value = float(np.mean(values))
+                        median_value = float(np.median(values))
+                        forced_value = mean_value / median_value if median_value != 0 else mean_value
+                        padded_group["norm_values"]["forced_layer"] = np.asarray(forced_value/100)
+                        padded_group["raw_values"]["forced_layer"] = np.asarray(forced_value/100)
+                        padded_group[rank_name]["forced_layer"] = percentileofscore([norm_val for norm_val in norm_values.values()],np.asarray(forced_value/100) )
 
                 self.control_memory["sudo_control_sens"] = padded_sensitivity
                 return padded_sensitivity
@@ -129,62 +179,47 @@ class validator(controller):
             ``"anot"``, one or two value arrays, and ``"sup_title"``.
         """
         selected_values = {"anot": anot}
-        if family[family_idx] == "sens_weight":
-            if sens_pad:
-                padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameters)
-                selected_values["weights"] = padded_sensitivity["weights"]["ranks_weights"]
-                selected_values["sup_title"] = "Sensitivity weight Ranking"
+        code = family[family_idx]
+        padded = self.sudo_control(sens_pad=True, parameters=parameters) if sens_pad else None
+        if code in {"sens_weight", "sens_bias"}:
+            parameter_type = "weights" if code == "sens_weight" else "biases"
+            rank_key = "ranks_weights" if parameter_type == "weights" else "ranks_biases"
+            selected_values[parameter_type] = (
+                padded[parameter_type][rank_key] if padded is not None
+                else self._metric_values(parameters, "sensitivity_score", parameter_type, "rank")
+            )
+            selected_values["sup_title"] = f"Sensitivity {parameter_type[:-1].capitalize()} Ranking"
+        elif code in {"lcs_weight", "lcs_bias", "evol_weight", "evol_bias"}:
+            parameter_type = "biases" if code.endswith("bias") else "weights"
+            metric = "layer_contribution_score" if code.startswith("lcs") else "evolution_score"
+            selected_values[parameter_type] = self._metric_values(parameters, metric, parameter_type, "rank")
+            selected_values["sup_title"] = f"{metric.replace('_', ' ').title()} {parameter_type[:-1].capitalize()} Ranking"
+        elif code in {"senvolution_b", "sensvolution_b", "sensvolution_w", "lsens_b", "lsens_w", "lvolution_w", "lvolution_b"}:
+            parameter_type = "biases" if code.endswith("_b") or code.endswith("b") else "weights"
+            if code.startswith("senvolution") or code.startswith("sensvolution"):
+                rank_key = "ranks_biases" if parameter_type == "biases" else "ranks_weights"
+                selected_values[f"{'bias' if parameter_type == 'biases' else 'weight'}_1"] = (
+                    padded[parameter_type][rank_key] if padded is not None
+                    else self._metric_values(parameters, "sensitivity_score", parameter_type, "rank")
+                )
+                selected_values[f"{'bias' if parameter_type == 'biases' else 'weight'}_2"] = self._metric_values(parameters, "evolution_score", parameter_type, "rank")
+                title = "Sensitivity & Evolution"
+            elif code.startswith("lsens"):
+                selected_values[f"{'bias' if parameter_type == 'biases' else 'weight'}_1"] = self._metric_values(parameters, "layer_contribution_score", parameter_type, "rank")
+                rank_key = "ranks_biases" if parameter_type == "biases" else "ranks_weights"
+                selected_values[f"{'bias' if parameter_type == 'biases' else 'weight'}_2"] = (
+                    padded[parameter_type][rank_key] if padded is not None
+                    else self._metric_values(parameters, "sensitivity_score", parameter_type, "rank")
+                )
+                title = "Layer & Sensitivity"
             else:
-                selected_values["weights"] = parameters["sensitivity_score"]["weights"]["ranks_weights"]
-                selected_values["sup_title"] = "Sensitivity Weight Ranking"
-        elif family[family_idx] == "sens_bias":
-            if sens_pad:
-                padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameters)
-                selected_values["biases"] = padded_sensitivity["biases"]["ranks_biases"]
-                selected_values["sup_title"] = "sensitivity Bias Ranking"
-        elif family[family_idx] == "lcs_bias":
-            selected_values["biases"] = parameters["layer_contribution_score"]["biases"]["ranks_biases"]
-            selected_values["sup_title"] = "Layer Contribution Bias Ranking"
-        elif family[family_idx] == "lcs_weight":
-            selected_values["weights"] = parameters["layer_contribution_score"]["weights"]["ranks_weights"]
-            selected_values["sup_title"] = "Layer Contribution Weight Ranking"
-        elif family[family_idx] == "evol_weight":
-            selected_values["weights"] = parameters["evolution_score"]["weights"]["ranks_weights"]
-            selected_values["sup_title"] = "Layer Contribution Weight Ranking"
-        elif family[family_idx] == "evol_bias":
-            selected_values["biases"] = parameters["evolution_score"]["biases"]["ranks_biases"]
-            selected_values["sup_title"] = "Layer Contribution Bias Ranking"
-        elif family[family_idx] == "senvolution_b":
-            padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameters)
-            selected_values["bias_1"] = padded_sensitivity["biases"]["ranks_biases"]
-            selected_values["bias_2"] = parameters["evolution_score"]["biases"]["rank_biases"]
-            selected_values["sup_title"] = "Sensitivity & Evolution Contribution Bias Ranking"
-        elif family[family_idx] == "sensvolution_w":
-            padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameters)
-            selected_values["weight_1"] = padded_sensitivity["weights"]["ranks_weights"]
-            selected_values["weight_2"] = parameters["evolution_score"]["weights"]["rank_weights"]
-            selected_values["sup_title"] = "Sensitivity & Evolution Contribution Weight Ranking"
-        elif family[family_idx] == "lsens_b":
-            selected_values["bias_1"] = parameters["layer_contribution_score"]["biases"]["ranks_biases"]
-            padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameters)
-            selected_values["bias_2"] = padded_sensitivity["biases"]["ranks_biases"]
-            selected_values["sup_title"] = "Layer & Sensitivity Contribution Bias Ranking"
-        elif family[family_idx] == "lsens_w":
-            selected_values["weight_1"] = parameters["layer_contribution_score"]["weights"]["ranks_weights"]
-            padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameters)
-            selected_values["weight_2"] = padded_sensitivity["weights"]["ranks_weights"]
-            selected_values["sup_title"] = "Layer & Sensitivity Contribution Weight Ranking"
-        elif family[family_idx] == "lvolution_w":
-            selected_values["weight_1"] = parameters["layer_contribution_score"]["weights"]["ranks_weights"]
-            selected_values["weight_2"] = parameters["evolution_score"]["weights"]["rank_weights"]
-            selected_values["sup_title"] = "Layer & Evolution Contribution Weight Ranking"
-        elif family[family_idx] == "lvolution_b":
-            selected_values["bias_1"] = parameters["layer_contribution_score"]["biases"]["ranks_biases"]
-            selected_values["bias_2"] = parameters["evolution_score"]["biases"]["rank_biases"]
-            selected_values["sup_title"] = "Layer & Evolution Contribution Bias Ranking"
+                selected_values[f"{'bias' if parameter_type == 'biases' else 'weight'}_1"] = self._metric_values(parameters, "layer_contribution_score", parameter_type, "rank")
+                selected_values[f"{'bias' if parameter_type == 'biases' else 'weight'}_2"] = self._metric_values(parameters, "evolution_score", parameter_type, "rank")
+                title = "Layer & Evolution"
+            selected_values["sup_title"] = f"{title} Contribution {parameter_type[:-1].capitalize()} Ranking"
         return selected_values
 
-    def scatter_validator(self, *, parameter, sens_pad: bool = True, family, family_idx, choice: Literal["non_grouped", "grouped_bias", "grouped_weight"]):
+    def scatter_validator(self, *, parameter, family, family_idx, choice: Literal["non_grouped", "grouped_bias", "grouped_weight"], sens_pad: bool = True):
         """Select paired layer values for a correlation/covariance scatter plot.
 
         Parameters
@@ -206,57 +241,58 @@ class validator(controller):
             Selected value array(s) plus ``"sup_title"``.
         """
         selected_values = {}
-        match choice:
-            case "non_grouped":
-                if family[family_idx] == "lcs_weight":
-                    selected_values["weights"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"].items() if k != "filtered_layers_weights"}
-                    selected_values["sup_title"] = "Layer Contribution Weight Relation"
-                elif family[family_idx] == "lcs_bias":
-                    selected_values["biases"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layers_biases"}
-                    selected_values["sup_title"] = "Layer Contribution Bias Relation"
-                elif family[family_idx] == "sens_weight":
-                    selected_values["weights"] = parameter["sensitivity_score"]["raw_values"]
-                    selected_values["sup_title"] = "Layer & Sensitivity Contribution Weight Relation"
-                elif family[family_idx] == "sens_bias":
-                    selected_values["biases"] = parameter["sensitivity_score"]["raw_values"]
-                    selected_values["sup_title"] = "Sensitivity Contribution Bias Relation"
-                elif family[family_idx] == "evol_bias":
-                    selected_values["biases"] = parameter["evolution_score"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution Contribution Bias Relation"
-                elif family[family_idx] == "evol_weight":
-                    selected_values["weights"] = parameter["evolution_score"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution Contribution Weight Relation"
-            case "grouped_weight":
-                if family[family_idx] == "lsens_w":
-                    selected_values["weight_1"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"].items() if k != "filtered_layer_weights"}
-                    padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameter)
-                    selected_values["weight_2"] = padded_sensitivity["weights"]["raw_values"]
-                    selected_values["sup_title"] = "Layer & Sensitivity Contribution Weight Relation"
-                elif family[family_idx] == "sensvolution_w":
-                    selected_values["weight_1"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"].items() if k != "filtered_layer_weights"}
-                    padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameter)
-                    selected_values["weight_2"] = padded_sensitivity["weigths"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution & Sensitivity Contribution Weight Relation"
-                elif family[family_idx] == "lvolution_w":
-                    selected_values["weight_1"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"].items() if k != "filtered_layer_weights"}
-                    selected_values["weight_2"] = parameter["evolution_score"]["weights"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution & Layer Contribution weight Relation"
-            case "grouped_bias":
-                if family[family_idx] == "lsens_b":
-                    selected_values["bias_1"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layer_biases"}
-                    padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameter)
-                    selected_values["bias_2"] = padded_sensitivity["biases"]["raw_values"]
-                    selected_values["sup_title"] = "Layer & Sensitivity Contribution Bias Relation"
-                elif family[family_idx] == "sensvolution_b":
-                    selected_values["bias_1"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layer_biases"}
-                    padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameter)
-                    selected_values["bias_2"] = padded_sensitivity["biases"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution & Sensitivity Contribution Bias Relation"
-                elif family[family_idx] == "lvolution_b":
-                    selected_values["bias_1"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layer_biases"}
-                    selected_values["bias_2"] = parameter["evolution_score"]["biases"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution & Layer Contribution Bias Relation"
-
+        code = family[family_idx]
+        if choice == "non_grouped":
+            family_map = {
+                "lcs_weight": ("layer_contribution_score", "weights", "raw", "Layer Contribution Weight Relation"),
+                "lcs_bias": ("layer_contribution_score", "biases", "raw", "Layer Contribution Bias Relation"),
+                "sens_weight": ("sensitivity_score", "weights", "raw", "Layer & Sensitivity Contribution Weight Relation"),
+                "sens_bias": ("sensitivity_score", "biases", "raw", "Sensitivity Contribution Bias Relation"),
+                "evol_bias": ("evolution_score", "biases", "raw", "Evolution Contribution Bias Relation"),
+                "evol_weight": ("evolution_score", "weights", "raw", "Evolution Contribution Weight Relation"),
+            }
+            if code in family_map:
+                metric, parameter_type, statistic, title = family_map[code]
+                selected_values[parameter_type] = self._metric_values(parameter, metric, parameter_type, statistic)
+                selected_values["sup_title"] = title
+        elif choice in {"grouped_weight", "grouped_bias"}:
+            parameter_type = "weights" if choice == "grouped_weight" else "biases"
+            prefix = "weight" if parameter_type == "weights" else "bias"
+            if code in {"lsens", "sensvolution", "lvolution"}:
+                code = f"{code}_{'w' if parameter_type == 'weights' else 'b'}"
+            if code in {"lsens_w", "lsens_b"}:
+                left_metric, right_metric, title = "layer_contribution_score", "sensitivity_score", "Layer & Sensitivity"
+            elif code in {"sensvolution_w", "sensvolution_b"}:
+                left_metric, right_metric, title = "evolution_score", "sensitivity_score", "Evolution & Sensitivity"
+            elif code in {"lvolution_w", "lvolution_b"}:
+                left_metric, right_metric, title = "layer_contribution_score", "evolution_score", "Evolution & Layer Contribution"
+            else:
+                return selected_values
+            left_values = self._metric_values(
+                parameter, left_metric, parameter_type, "norm"
+            )
+            if right_metric == "sensitivity_score" and sens_pad:
+                padded_sensitivity = self.sudo_control(
+                    sens_pad=True, parameters=parameter
+                )
+                right_values = padded_sensitivity[parameter_type]["norm_values"]
+            else:
+                right_values = self._metric_values(
+                    parameter, right_metric, parameter_type, "norm"
+                )
+            shared_layers = [layer for layer in left_values if layer in right_values]
+            if len(shared_layers) < 2:
+                raise ValueError(
+                    f"Grouped {parameter_type} correlation for {family[family_idx]!r} "
+                    "requires at least two layers with values in both metrics."
+                )
+            selected_values[f"{prefix}_1"] = {
+                "layer_summaries": np.asarray([left_values[layer] for layer in shared_layers])
+            }
+            selected_values[f"{prefix}_2"] = {
+                "layer_summaries": np.asarray([right_values[layer] for layer in shared_layers])
+            }
+            selected_values["sup_title"] = f"{title} Contribution {parameter_type[:-1].capitalize()} Relation"
         return selected_values
 
     def box_plot_validator(self, *, family_idx, family, parameter):
@@ -277,24 +313,19 @@ class validator(controller):
             ``"weights"`` or ``"biases"`` (layer -> array) plus ``"sup_title"``.
         """
         selected_values = {}
-        if family[family_idx] == "lcs_weight":
-            selected_values["weights"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"]["filtered_layer_weights"].items()}
-            selected_values["sup_title"] = "Layer Contribution Weight"
-        elif family[family_idx] == "lcs_bias":
-            selected_values["biases"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"]["filtered_layer_biases"].items()}
-            selected_values["sup_title"] = "Layer Contribution Bias"
-        elif family[family_idx] == "sens_weight":
-            selected_values["weights"] = parameter["sensitivity_score"]["norm_values"]
-            selected_values["sup_title"] = "Sensitivity Contribution Weight"
-        elif family[family_idx] == "sens_bias":
-            selected_values["biases"] = parameter["sensitivity_score"]["norm_values"]
-            selected_values["sup_title"] = "Sensitivity Contribution Bias"
-        elif family[family_idx] == "evol_bias":
-            selected_values["biases"] = parameter["evolution_score"]["norm_values"]
-            selected_values["sup_title"] = "Evolution Contribution Bias"
-        elif family[family_idx] == "evol_weight":
-            selected_values["weights"] = parameter["evolution_score"]["norm_values"]
-            selected_values["sup_title"] = "Evolution Contribution Weight"
+        family_map = {
+            "lcs_weight": ("layer_contribution_score", "weights", "raw"),
+            "lcs_bias": ("layer_contribution_score", "biases", "raw"),
+            "sens_weight": ("sensitivity_score", "weights", "norm"),
+            "sens_bias": ("sensitivity_score", "biases", "norm"),
+            "evol_bias": ("evolution_score", "biases", "norm"),
+            "evol_weight": ("evolution_score", "weights", "norm"),
+        }
+        code = family[family_idx]
+        if code in family_map:
+            metric, parameter_type, statistic = family_map[code]
+            selected_values[parameter_type] = self._metric_values(parameter, metric, parameter_type, statistic)
+            selected_values["sup_title"] = f"{metric.replace('_', ' ').title()} {parameter_type[:-1].capitalize()}"
         return selected_values
 
     def hist_plot_validator(self, *, family_idx, family, parameter, kind: Literal["grouped_weight", "grouped_bias"], sens_pad: bool = True):
@@ -318,39 +349,14 @@ class validator(controller):
         dict
             Paired value arrays plus ``"sup_title"``.
         """
-        selected_values = {}
-        match kind:
-            case "grouped_weight":
-                if family[family_idx] == "lsens_w":
-                    selected_values["weight_1"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"].items() if k != "filtered_layer_weights"}
-                    padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameter)
-                    selected_values["weight_2"] = padded_sensitivity["weights"]["raw_values"]
-                    selected_values["sup_title"] = "Layer & Sensitivity Contribution Weight Relation"
-                elif family[family_idx] == "sensvolution_w":
-                    selected_values["weight_1"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"].items() if k != "filtered_layer_weights"}
-                    padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameter)
-                    selected_values["weight_2"] = padded_sensitivity["weigths"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution & Sensitivity Contribution Weight Relation"
-                elif family[family_idx] == "lvolution_w":
-                    selected_values["weight_1"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"].items() if k != "filtered_layer_weights"}
-                    selected_values["weight_2"] = parameter["evolution_score"]["weights"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution & Layer Contribution weight Relation"
-            case "grouped_bias":
-                if family[family_idx] == "lsens_b":
-                    selected_values["bias_1"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layer_biases"}
-                    padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameter)
-                    selected_values["bias_2"] = padded_sensitivity["biases"]["raw_values"]
-                    selected_values["sup_title"] = "Layer & Sensitivity Contribution Bias Relation"
-                elif family[family_idx] == "sensvolution_b":
-                    selected_values["bias_1"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layer_biases"}
-                    padded_sensitivity = self.sudo_control(sens_pad=sens_pad, parameters=parameter)
-                    selected_values["bias_2"] = padded_sensitivity["biases"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution & Sensitivity Contribution Bias Relation"
-                elif family[family_idx] == "lvolution_b":
-                    selected_values["bias_1"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layer_biases"}
-                    selected_values["bias_2"] = parameter["evolution_score"]["biases"]["raw_values"]
-                    selected_values["sup_title"] = "Evolution & Layer Contribution Bias Relation"
-        return selected_values
+        choice = "grouped_weight" if kind == "grouped_weight" else "grouped_bias"
+        return self.scatter_validator(
+            parameter=parameter,
+            sens_pad=sens_pad,
+            family=family,
+            family_idx=family_idx,
+            choice=choice,
+        )
 
     def fitting_plot_validator(self, *, parameter, family_idx, family):
         """Select per-layer values for a linear-regression fitting plot.
@@ -369,26 +375,7 @@ class validator(controller):
         dict
             ``"weights"`` or ``"biases"`` plus ``"sup_title"``.
         """
-        selected_values = {}
-        if family[family_idx] == "lcs_weight":
-            selected_values["weights"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"]["filtered_layer_weights"].items() if k != "filtered_layers_weights"}
-            selected_values["sup_title"] = "Layer Contribution Weight"
-        elif family[family_idx] == "lcs_bias":
-            selected_values["biases"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layers_biases"}
-            selected_values["sup_title"] = "Layer Contribution Bias"
-        elif family[family_idx] == "sens_weight":
-            selected_values["weights"] = parameter["sensitivity_score"]["raw_values"]
-            selected_values["sup_title"] = "Sensitivity Contribution Weight"
-        elif family[family_idx] == "sens_bias":
-            selected_values["biases"] = parameter["sensitivity_score"]["raw_values"]
-            selected_values["sup_title"] = "Sensitivity Contribution Bias"
-        elif family[family_idx] == "evol_bias":
-            selected_values["biases"] = parameter["evolution_score"]["raw_values"]
-            selected_values["sup_title"] = "Evolution Contribution Bias"
-        elif family[family_idx] == "evol_weight":
-            selected_values["weights"] = parameter["evolution_score"]["raw_values"]
-            selected_values["sup_title"] = "Evolution Contribution Weight"
-        return selected_values
+        return self._single_family_values(parameter, family[family_idx], "raw")
 
     def mad_plot_validator(self, *, parameter, family, family_idx):
         """Select per-layer arrays for a median-absolute-deviation plot.
@@ -407,26 +394,7 @@ class validator(controller):
         dict
             ``"weights"`` or ``"biases"`` plus ``"sup_title"``.
         """
-        selected_values = {}
-        if family[family_idx] == "lcs_weight":
-            selected_values["weights"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"]["filtered_layer_weights"].items() if k != "filtered_layers_weights"}
-            selected_values["sup_title"] = "Layer Contribution Weight"
-        elif family[family_idx] == "lcs_bias":
-            selected_values["biases"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layers_biases"}
-            selected_values["sup_title"] = "Layer Contribution Bias"
-        elif family[family_idx] == "sens_weight":
-            selected_values["weights"] = parameter["sensitivity_score"]["raw_values"]
-            selected_values["sup_title"] = "Sensitivity Contribution Weight"
-        elif family[family_idx] == "sens_bias":
-            selected_values["biases"] = parameter["sensitivity_score"]["raw_values"]
-            selected_values["sup_title"] = "Sensitivity Contribution Bias"
-        elif family[family_idx] == "evol_bias":
-            selected_values["biases"] = parameter["evolution_score"]["raw_values"]
-            selected_values["sup_title"] = "Evolution Contribution Bias"
-        elif family[family_idx] == "evol_weight":
-            selected_values["weights"] = parameter["evolution_score"]["raw_values"]
-            selected_values["sup_title"] = "Evolution Contribution Weight"
-        return selected_values
+        return self._single_family_values(parameter, family[family_idx], "raw")
 
     def large_dist_plot_validator(self, *, family, family_idx, parameter):
         """Select per-layer arrays for the large-distribution Datashader plot.
@@ -445,25 +413,25 @@ class validator(controller):
         dict
             ``"weights"`` or ``"biases"`` plus ``"sup_title"``.
         """
+        return self._single_family_values(parameter, family[family_idx], "raw")
+
+    def _single_family_values(self, parameter, code, statistic):
+        """Select one named metric family for the array-oriented validators."""
+        family_map = {
+            "lcs_weight": ("layer_contribution_score", "weights"),
+            "lcs_bias": ("layer_contribution_score", "biases"),
+            "sens_weight": ("sensitivity_score", "weights"),
+            "sens_bias": ("sensitivity_score", "biases"),
+            "evol_weight": ("evolution_score", "weights"),
+            "evol_bias": ("evolution_score", "biases"),
+        }
         selected_values = {}
-        if family[family_idx] == "lcs_weight":
-            selected_values["weights"] = {k: v for k, v in parameter["layer_contribution_score"]["weights"]["filtered_layer_weights"].items() if k != "filtered_layers_weights"}
-            selected_values["sup_title"] = "Layer Contribution Weight"
-        elif family[family_idx] == "lcs_bias":
-            selected_values["biases"] = {k: v for k, v in parameter["layer_contribution_score"]["biases"].items() if k != "filtered_layers_biases"}
-            selected_values["sup_title"] = "Layer Contribution Bias"
-        elif family[family_idx] == "sens_weight":
-            selected_values["weights"] = parameter["sensitivity_score"]["raw_values"]
-            selected_values["sup_title"] = "Sensitivity Contribution Weight"
-        elif family[family_idx] == "sens_bias":
-            selected_values["biases"] = parameter["sensitivity_score"]["raw_values"]
-            selected_values["sup_title"] = "Sensitivity Contribution Bias"
-        elif family[family_idx] == "evol_bias":
-            selected_values["biases"] = parameter["evolution_score"]["raw_values"]
-            selected_values["sup_title"] = "Evolution Contribution Bias"
-        elif family[family_idx] == "evol_weight":
-            selected_values["weights"] = parameter["evolution_score"]["raw_values"]
-            selected_values["sup_title"] = "Evolution Contribution Weight"
+        if code in family_map:
+            metric, parameter_type = family_map[code]
+            selected_values[parameter_type] = self._metric_values(
+                parameter, metric, parameter_type, statistic
+            )
+            selected_values["sup_title"] = f"{metric.replace('_', ' ').title()} {parameter_type[:-1].capitalize()}"
         return selected_values
 
 
@@ -596,6 +564,13 @@ class visualizer:
                     layer_score = score_array.item() if score_array.ndim == 0 else np.mean(score_array)
                 rows.append({"Layers": layer_name, "Scores": layer_score, "Group": group_name})
         data = pd.DataFrame(rows)
+        if data.empty:
+            selected_family = self.family[family_idx]
+            if selected_family in {"evol_weight", "evol_bias"}:
+                raise ValueError(
+                    "No evolution scores are available. Evolution plots require matching current and trained/reference weights in parameters."
+                )
+            raise ValueError(f"No score data is available for family {selected_family!r}.")
 
         match choice:
             case "non_grouped":
@@ -710,12 +685,19 @@ class visualizer:
             x_range=(-0.5, max(len(layer_labels) - 0.5, 0.5)),
         )
         aggregate = canvas.points(df, x="Layer", y="Value", agg=ds.count())
+        style_palette = self._style(plot_style)["palette"]
+        if isinstance(style_palette, Mapping):
+            style_palette = list(style_palette.values())
+        cmap = sns.color_palette(style_palette, n_colors=7).as_hex()
         image = tf.shade(
             aggregate,
-            cmap=["#000004", "#2c115f", "#721f81", "#b73779", "#f1605d", "#feb078", "#fcfdbf"],
+            cmap=cmap,
             how="eq_hist",
         )
-        style, _, axes = self._figure(plot_style, fig_size=(12, 6))
+        fig_size = (plot_style or {}).get(
+            "fig_size", self.plot_style.get("fig_size", (12, 6))
+        )
+        style, _, axes = self._figure(plot_style, fig_size=fig_size)
         axes.imshow(image.to_pil(), aspect="auto", origin="lower")
         axes.set_xticks(
             np.linspace(0, len(layer_labels) - 1, min(len(layer_labels), 10), dtype=int),
@@ -742,7 +724,7 @@ class visualizer:
             Displays the plot via ``plt.show()``.
         """
         obj = validator()
-        selected_values = obj.box_plot_validator(family_index=family_index, family=self.family, parameter=parameters)
+        selected_values = obj.box_plot_validator(family_idx=family_index, family=self.family, parameter=parameters)
         df = pd.DataFrame(
             [
                 {"Layer": layer_name, "Value": element, "Group": group_name}
