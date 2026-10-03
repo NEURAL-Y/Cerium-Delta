@@ -241,14 +241,16 @@ class bridge:
     def nvs_output_to_json(self,*,nvs_dict:dict,filename:str,indent:int=4):
       """Write an NVS result dictionary to a formatted JSON file.
 
-      Pass a JSON-serializable dictionary, such as the result returned by
-      ``nvs_export_info``, and provide an output path ending in ``.json``.
+      Pass an NVS result dictionary, such as the result returned by
+      ``nvs_export_info``. NumPy arrays and scalars are converted to their
+      corresponding JSON-compatible Python values.
       The ``indent`` option controls the whitespace used to format the file.
 
       Parameters
       ----------
       nvs_dict : dict
-          NVS metric results or other JSON-serializable output data.
+          NVS metric results or other JSON-serializable output data. NumPy
+          arrays and scalars are supported.
       filename : str
           Destination path. The extension must be ``.json``.
       indent : int, default=4
@@ -264,8 +266,17 @@ class bridge:
       ``model_bridge.nvs_output_to_json(nvs_dict=result, filename="nvs.json")``
       """
       if filename.endswith(".json"):
+        def json_default(value):
+          if isinstance(value, np.ndarray):
+              return value.tolist()
+          if isinstance(value, np.generic):
+              return value.item()
+          raise TypeError(
+              f"Object of type {type(value).__name__} is not JSON serializable"
+          )
+
         with open(filename,"w") as f:
-            js.dump(nvs_dict,f,indent=indent)
+            js.dump(nvs_dict,f,indent=indent,default=json_default)
       else:
         raise AttributeError("FILENAME_INVALID : use <filename>.json")
     
@@ -644,4 +655,3 @@ class bridge:
 
         if "bias" in name:
             self.nvs_memory[bias_key][layer_name] = parameters
-
