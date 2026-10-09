@@ -29,7 +29,7 @@ from .exporters.dev import bridge
 from .visualizers.static_viz import visualizer
 from .visualizers.stats_method import Statistical
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 __all__ = [
     "NVS",
