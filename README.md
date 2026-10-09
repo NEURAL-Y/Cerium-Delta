@@ -29,7 +29,6 @@
 > Click the release / pre-release badges above to see what shipped and what's currently in development — each links to demo assets and source for that milestone.
 
 ---
-![announcement](https://github.com/NEURAL-Y/Cerium-Delta/blob/main/public/nvb-announcement.svg)
 
 ## What Cerium Delta Is
 
