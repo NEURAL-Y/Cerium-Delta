@@ -1,526 +1,434 @@
 # CERIUM DELTA
+
 ## DEVELOPMENT CHARTER
 
-### Future Development Vision
-
----
-
-**Document ID:** CD-DC-001
-**Version:** 1.0
-**Status:** Active
-**Date:** 22 August 2026
+**Document ID:** CD-DC-002\
+**Version:** 2.0\
+**Status:** Active\
+**Date:** 17 November 2026\
+**Project:** Cerium Delta\
 **Author / Project Lead:** @neural-y
 
----
+------------------------------------------------------------------------
 
 # 1. PURPOSE
 
-This Development Charter records the planned future development of
-Cerium Delta.
+This Development Charter defines the updated development direction,
+planned versions, research priorities, and long-term technical
+objectives of Cerium Delta.
 
-It defines the intended future versions, research directions, metric
-expansion, visualization technologies, programming-language support, and
-long-term technical objectives of the project.
+Cerium Delta is being developed as a framework for analyzing and
+benchmarking neural-network architectures and their behaviour. Its
+development is organized around independently defined metrics,
+reproducible measurements, and research-backed evaluation.
 
-This document is intentionally forward-looking. It describes what is
-planned for future releases rather than documenting features that have
-already been completed.
+This charter records the current roadmap as of 17 November 2026. It
+supersedes the previous development roadmap where the two documents
+differ. The roadmap may change as research, experimentation, validation,
+and technical feasibility evolve.
 
-The roadmap may evolve according to research findings, experimentation,
-validation, technical feasibility, and future development.
+**Roadmap status note:** Planned capabilities and target timeframes are
+intentions, not guarantees of implementation, release, or scientific
+validation. A metric is not considered scientifically established merely
+because it has been implemented.
 
-> **A single governing note applies to this entire document:** every
-> capability described below — for V2, V3, or beyond — is a planned
-> direction. None of it implies existing implementation, a committed
-> release date, or scientific validation. This note is stated once here
-> and is not repeated per-section.
-
----
+------------------------------------------------------------------------
 
 # 2. DEVELOPMENT PRINCIPLES
 
 Future development will follow these principles:
 
-- Research before finalization
-- Mathematical definition before implementation
-- Experimental validation before strong claims
-- Reproducible measurements
-- Modular metric architecture
-- Separation of metrics and visualization
-- Language and framework interoperability
-- Transparent limitations
-- Continuous experimentation
+-   Research before finalization.
+-   Mathematical definition before implementation.
+-   Experimental validation before strong claims.
+-   Reproducible and comparable measurements.
+-   Modular metric architecture.
+-   Clear separation between measurement, interpretation, and
+    visualization.
+-   Transparent assumptions and limitations.
+-   Computational efficiency and responsible memory usage.
+-   Compatibility with a range of neural-network architectures and use
+    cases where technically feasible.
 
----
+------------------------------------------------------------------------
 
-# 3. VERSION 2
+# 3. VERSION 1 --- LAYER SENSITIVITY SCORE (LSS)
 
-## NATIVE VISUALIZATION, ACTIVATION & OPTIMIZATION ANALYSIS
+**Primary focus:** Pre-training neural architecture benchmarking\
+**Status:** In development / planned release\
+**Expected release:** End of November 2026
 
-**Status:** Planned
-**Expected Timeframe:** 1 September 2026 – 15 October 2026
+## 3.1 Objective
 
-Version 2 will focus on native development, advanced visualization,
-activation measurement, and optimizer-oriented metrics.
+Version 1 introduces the **Layer Sensitivity Score (LSS)** as a metric
+for benchmarking a machine-learning model's architecture before
+training.
 
----
+The central objective is to assess architectural adaptability and
+examine the sensitivity of individual layers or their components. LSS is
+intended to identify the most sensitive parts of an architecture and
+assign scores that help characterize their sensitivity.
+
+## 3.2 Core capabilities
 
-## 3.1 C++ SUPPORT
+The intended LSS workflow includes:
+
+-   Inspecting the architecture before model training.
+-   Evaluating layer-level sensitivity.
+-   Identifying comparatively sensitive parts within layers.
+-   Assigning scores to the evaluated layers or components.
+-   Presenting the resulting measurements in a form that supports
+    architecture comparison.
+
+## 3.3 Intended use
 
-C++ support is planned for V2, providing a foundation for:
+LSS is intended to provide an architecture-level benchmark before
+training. It should help users investigate how an architecture is
+structured in terms of sensitivity and adaptability, without requiring a
+completed training run.
 
-- Native components
-- Performance-sensitive computation
-- Low-level processing
-- Native integrations
-- Future high-performance systems
+LSS should be presented as an analytical signal, not as a guarantee of
+final model accuracy, generalization, or training success.
 
-C++ components should integrate with the existing analytical architecture
-rather than requiring the entire system to be rewritten independently.
-The intended interoperability mechanism is a defined C-compatible interface
-(e.g. `pybind11` or a thin C ABI) so Python-side metric orchestration can
-call into native code without duplicating logic on either side. The exact
-binding approach is undecided and will be settled during V2 prototyping.
+## 3.4 Research and validation requirements
 
----
+Before making strong claims about LSS, development should establish:
 
-## 3.2 OPENGL SUPPORT
+-   A precise mathematical definition and documented assumptions.
+-   The meaning and interpretation of the resulting score.
+-   Numerical stability and repeatability.
+-   Behaviour across different architectures and layer configurations.
+-   Whether scores are comparable across architectures of different
+    sizes or types.
+-   The relationship, if any, between LSS and outcomes observed after
+    training.
 
-OpenGL support is planned for the visualization system. The visualizer
-will provide an option to switch between rendering backends:
+The V1 release should document known limitations and distinguish
+measured results from hypotheses.
 
-```text
-                    VISUALIZER
-                         │
-                ┌────────┴────────┐
-                │                 │
-             TURTLE             OPENGL
-                │                 │
-          Lightweight        Interactive /
-          Visualization       Native Rendering
-```
+------------------------------------------------------------------------
 
-The rendering backend should remain independent from metric computation.
-Users should be able to switch between Turtle and OpenGL visualization
-without changing the underlying analytical workflow.
+# 4. VERSION 2 --- METRIC DIVERSITY AND EVOLUTION QUANTUM SCORE (EQS)
 
----
+**Primary focus:** Broader metric options and evaluation of model
+evolution and optimization\
+**Status:** Planned\
+**Expected timeframe:** New Year 2027
 
-## 3.3 ACTIVATION MEASUREMENT METRICS
+## 4.1 Objective
 
-V2 will introduce a dedicated activation measurement system. Planned areas
-include:
+Version 2 will expand Cerium Delta beyond its initial
+architecture-sensitivity focus. It will emphasize greater diversity in
+the available metrics and more options for applying the framework to
+different evaluation needs.
 
-- Activation magnitude
-- Activation distribution
-- Activation sparsity
-- Layer-wise activation behavior
-- Activation evolution
-- Activation utilization
-- Activation comparison
+A central planned addition is the **Evolution Quantum Score (EQS)**.
 
-Activation measurements will remain independently selectable from other
-metric families.
+## 4.2 Evolution Quantum Score (EQS)
 
----
+EQS is intended to evaluate aspects of model behaviour associated with
+the architecture and optimizer, particularly how they influence the
+model's response to inputs and its ability to produce predictions.
 
-## 3.4 OPTIMIZER BEHAVIOR METRICS
+The research direction is to investigate how much the optimizer and
+architecture affect the model's input-to-output predictive behaviour,
+and whether these measurements can provide useful benchmarks.
 
-V2 will introduce a dedicated optimizer metric system focused on
-**observed, empirical optimizer behavior during training** — i.e. what the
-optimizer actually does, measured from logged training state rather than
-derived from its update rule. Planned areas include:
+## 4.3 Intended research areas
 
-- Parameter update magnitude (observed, per-step)
-- Update direction and consistency over time
-- Optimizer-state behavior (e.g. momentum/variance term evolution)
-- Comparative optimizer analysis across runs
+The current EQS research direction includes:
 
-These metrics are diagnostic and empirical: they describe what happened
-during a specific training run.
+-   Evaluating the impact of the optimizer on model behaviour.
+-   Evaluating the impact of architecture on input-to-output prediction
+    behaviour.
+-   Investigating how effectively a model responds to inputs and
+    produces outputs.
+-   Exploring whether EQS-related measurements can provide useful
+    signals about model evolution.
+-   Investigating memory requirements and training-time implications as
+    part of the broader evaluation and benchmarking workflow.
+-   Exploring whether the measurements can provide indirect signals
+    associated with overfitting or underfitting.
 
----
+## 4.4 Interpretation and limitations
 
-## 3.5 OPTIMIZER FORMULA METRICS
+EQS is a planned research metric. Its mathematical formulation,
+components, score interpretation, and validation methodology remain
+subject to research.
 
-A major V2 research direction is the development of metrics based directly
-on **optimizer mathematical formulations** — i.e. what the update rule
-implies, derived analytically from the optimizer's formula rather than
-observed from a run. The objective is to analyze optimizer behavior
-independent of any specific training instance, rather than evaluating
-optimizers only through final model performance.
+In particular:
 
-Potential research areas include:
+-   An EQS result should not be presented as a definitive diagnosis of
+    overfitting or underfitting without validation against appropriate
+    training and validation evidence.
+-   Memory consumption and training time should be measured and reported
+    with clearly defined experimental conditions. They should not be
+    assumed to follow directly from a predictive-behaviour score.
+-   Architecture impact and optimizer impact should be distinguishable
+    where the methodology permits, so users can understand what a
+    reported result represents.
+-   Comparisons should account for relevant differences in datasets,
+    model configurations, hardware, and training procedures.
 
-- Formula-derived optimizer metrics (closed-form, not measured from logs)
-- Update-rule analysis (e.g. how an update rule scales with gradient
-  magnitude or curvature, independent of a given run)
-- Mathematical comparison of optimization methods
-- Theoretical optimization behavior across training regimes
+The final design may use a core EQS score with separately reported
+components or supporting measurements. The structure will be decided
+through research rather than assumed in advance.
 
-**Relationship to 3.4:** 3.4 measures what an optimizer *did*; 3.5
-characterizes what an optimizer's formula *implies it will do*. The two
-are complementary — 3.5's derivations should eventually be checked against
-3.4's empirical measurements as a validation step.
+## 4.5 Metric diversity and usability
+
+Beyond EQS, V2 will focus on expanding the diversity of Cerium Delta's
+metrics and the options available to users. New metrics should be
+independently defined, selectable where appropriate, and documented with
+their intended use and limitations.
 
-These metrics will require mathematical formulation, experimentation,
-testing, and validation before being considered established measurements.
+------------------------------------------------------------------------
 
----
+# 5. VERSION 3 --- COMPUTATIONAL EFFICIENCY
 
-# 4. VERSION 3
+**Primary focus:** Faster metric computation and lower memory usage\
+**Status:** Future research / under consideration\
+**Expected timeframe:** Indefinite
 
-## CROSS-LANGUAGE SUPPORT & ARCHITECTURE EFFECTIVENESS
+## 5.1 Objective
 
-**Status:** Long-Term Vision
-**Expected Timeframe:** 30 October 2026 – 15 November 2026
+Version 3 is intended to investigate improvements to the computational
+efficiency of Cerium Delta's equations and metric calculations.
 
-Version 3 will represent a major expansion toward broader language support,
-forward and backward computational analysis, inference analysis, and
-architecture-level health indexing.
+## 5.2 Research directions
 
-V3 will focus on understanding effectiveness across different stages of
-neural computation:
+Potential areas of work include:
 
-```text
-              VERSION 3
-                  │
-       ┌──────────┼──────────┐
-       │          │          │
-    Forward    Backward   Inference
-       │          │          │
-       └──────────┼──────────┘
-                  │
-                  ▼
-        Architecture Health
-             Indexing
-```
+-   Reducing the time required to compute metrics.
+-   Investigating more efficient mathematical or numerical approaches.
+-   Reducing memory consumption during metric computation.
+-   Improving the handling of larger architectures and analysis
+    workloads.
+-   Identifying avoidable intermediate calculations or memory
+    allocations.
+-   Benchmarking performance improvements against existing
+    implementations.
 
----
+Any optimization must preserve the intended mathematical meaning of the
+metric, or clearly document where an approximation or trade-off is
+introduced.
 
-## 4.1 NODE.JS SUPPORT
+No release date is committed for V3.
 
-Node.js support is planned for V3, extending Cerium Delta into the
-JavaScript and Node.js ecosystem:
+------------------------------------------------------------------------
 
-- Node.js integration
-- Analysis workflows
-- API integration
-- Cross-language interoperability
-- JavaScript ecosystem support
+# 6. VERSION 4 --- ADVANCED ARCHITECTURE VISUALIZATION
 
-The likely integration path is a REST/JSON API exposed by the Python core
-(rather than a native Node binding), consistent with keeping metric
-computation centralized and language bindings thin.
+**Primary focus:** Improved graphical representation of neural-network
+architectures\
+**Status:** Future research / under consideration\
+**Expected timeframe:** Indefinite
 
----
+## 6.1 Objective
 
-## 4.2 RUST SUPPORT
+Version 4 is intended to advance the graphical visualization of
+neural-network architectures within Cerium Delta.
 
-Rust support is planned for V3, providing a systems-level environment for:
+The goal is to improve how users view and understand architecture
+structures and the analytical information associated with them.
 
-- High-performance computation
-- Native analytical components
-- Systems integration
-- Performance-sensitive processing
-- Future native infrastructure
+## 6.2 Research directions
 
-Rust support should integrate with the broader Cerium Delta architecture
-through clearly defined interfaces — most plausibly FFI against the same
-native boundary established for C++ in 3.1, so V2 and V3 native work share
-one interop layer rather than two.
-
----
-
-## 4.3 EXTENDED FORWARD-PASS EFFECTIVENESS METRICS
-
-V3 will introduce **Forward-Pass Effectiveness** metrics, investigating how
-effectively computation and information progress through an architecture
-during forward propagation.
-
-Potential research areas include:
-
-- Forward propagation behavior and layer-level forward effectiveness
-- Information progression and propagation efficiency
-- Activation effectiveness
-- Layer contribution during forward propagation, and how it changes
-  across layers
-
-**Open research question:** whether forward-pass effectiveness can be
-approximated from existing LCS/Sensitivity-style signals (a re-weighting
-of already-computed per-layer scores) or whether it requires new
-instrumentation (e.g. capturing intermediate activations directly). This
-is the first thing to resolve before formulation begins.
-
-The final mathematical formulation will be determined through future
-research, experimentation, and validation.
-
----
-
-## 4.4 EXTENDED BACKWARD-PASS EFFECTIVENESS METRICS
-
-V3 will introduce **Backward-Pass Effectiveness** metrics, investigating
-how effectively learning signals propagate through an architecture during
-backward propagation.
-
-Potential research areas include:
-
-- Gradient propagation, attenuation, and amplification
-- Gradient magnitude and layer-level backward effectiveness
-- Learning-signal propagation and backward-path analysis
-
-**Open research question:** the natural starting point is gradient-norm
-ratios between adjacent layers (a direct backward analogue of the forward
-Jacobian-based Sensitivity metric already in NVB), to be tested for
-numerical stability before anything more elaborate is attempted.
-
-The final formulation will be developed and validated through future
-experimentation.
-
----
-
-## 4.5 INFERENCE EFFECTIVENESS METRICS
-
-V3 will introduce **Inference Effectiveness** metrics, focused specifically
-on architecture behavior during inference (as distinct from training).
-
-Potential research areas include:
-
-- Layer utilization and activation behavior during inference
-- Computational effectiveness and architecture-level efficiency
-- Output consistency and inference-time characteristics
-
-Inference effectiveness will be treated separately from
-training-oriented measurements, since inference has no gradient signal
-to draw on and any metric here must be derivable from forward-only
-computation.
-
----
-
-## 4.6 OVERALL ARCHITECTURE HEALTH INDEXING
-
-A major V3 research objective is **Overall Architecture Health Indexing**:
-investigating whether multiple independently measured signals can be
-combined into an architecture-level representation.
-
-```text
-Forward-Pass Effectiveness
-            │
-            ├──────────────┐
-            │              │
-Backward-Pass Effectiveness
-            │
-            ├──────────────┤
-            │
-Inference Effectiveness
-            │
-            ├──────────────┤
-            │
-Activation Metrics
-            │
-            │
-Optimizer Metrics
-            │
-            │
-Existing Research Metrics
-            │
-            └──────┬───────┘
-                   ▼
-        Architecture Health
-              Indexing
-```
-
-**Open research question:** the existing NVB precedent — percentile-rank
-averaging across LCS, Sensitivity, and Evolution — is the obvious starting
-candidate for a combination method, since it is already validated to
-tighten variance versus any single metric. Whether that same rank-averaging
-approach generalizes cleanly to a larger, more heterogeneous signal set
-(forward/backward/inference/activation/optimizer) is the central open
-question for this section, and should be tested before any alternative
-(e.g. learned weighting) is considered.
-
-The resulting index will require independent mathematical formulation,
-testing, experimentation, and validation. It should not automatically be
-interpreted as a universal measure of overall model quality.
-
----
-
-# 5. FUTURE LANGUAGE & TECHNOLOGY SUPPORT
-
-| Version | Technology | Planned Direction | Integration Path | Expected Timeframe |
-|---|---|---|---|---|
-| V2 | C++ | Native and performance-oriented components | C-compatible binding (e.g. pybind11) | 1 Sep – 15 Oct 2026 |
-| V2 | OpenGL | Interactive/native visualization | Independent rendering backend, swappable with Turtle | 1 Sep – 15 Oct 2026 |
-| V2 | Turtle | Continued lightweight visualization | Existing, unchanged | — |
-| V3 | Node.js | JavaScript ecosystem integration | REST/JSON API against Python core | 30 Oct – 15 Nov 2026 |
-| V3 | Rust | Systems-level and performance-oriented integration | FFI, shared native boundary with 3.1 | 30 Oct – 15 Nov 2026 |
-
-The purpose of multi-language support is interoperability and specialized
-capability rather than maintaining isolated copies of the entire project.
-All bindings are intended to be thin layers over one centralized metric
-core rather than parallel reimplementations.
-
----
-
-# 6. FUTURE METRIC EXPANSION
-
-```text
-V2
-│
-├── Activation Metrics
-│
-├── Optimizer Behavior Metrics (empirical)
-│
-└── Optimizer Formula Metrics (analytical)
-│
-▼
-V3
-│
-├── Forward-Pass Effectiveness
-│
-├── Backward-Pass Effectiveness
-│
-├── Inference Effectiveness
-│
-└── Overall Architecture Health Indexing
-```
-
-Additional metric families may be introduced when future research
-identifies useful and mathematically definable measurements.
-
----
-
-# 7. RESEARCH DEVELOPMENT PROCESS
-
-```text
+Potential areas of work include:
+
+-   Improving graphical representations of neural-network architectures.
+-   Making layer and component relationships easier to inspect.
+-   Improving the presentation of metric results alongside architecture
+    structures.
+-   Exploring more useful ways to navigate and interpret complex
+    architectures.
+-   Considering visualization performance and memory requirements.
+
+The exact visualization technologies, interaction model, and
+implementation approach have not yet been finalized.
+
+No release date is committed for V4.
+
+------------------------------------------------------------------------
+
+# 7. VERSION ROADMAP SUMMARY
+
+  ------------------------------------------------------------------------------
+  Version           Primary direction Main focus               Expected
+                                                               timeframe
+  ----------------- ----------------- ------------------------ -----------------
+  V1                Layer Sensitivity Pre-training             End of November
+                    Score (LSS)       architecture sensitivity 2026
+                                      and adaptability         
+                                      benchmarking             
+
+  V2                Metric diversity  Architecture/optimizer   New Year 2027
+                    and EQS           impact, predictive       
+                                      behaviour, and broader   
+                                      evaluation options       
+
+  V3                Computational     Faster equation          Indefinite
+                    efficiency        computation and reduced  
+                                      memory usage             
+
+  V4                Advanced          Improved graphical       Indefinite
+                    visualization     neural-network           
+                                      architecture             
+                                      visualization            
+  ------------------------------------------------------------------------------
+
+The V1 and V2 timeframes are current targets. V3 and V4 remain future
+research directions without committed release dates.
+
+------------------------------------------------------------------------
+
+# 8. RESEARCH AND RELEASE PROCESS
+
+New metrics and significant technical changes should follow a
+research-led development process:
+
+``` text
 Research Idea
-      ↓
-Mathematical Formulation
-      ↓
+     ↓
+Mathematical Definition
+     ↓
+Assumptions and Intended Interpretation
+     ↓
 Prototype
-      ↓
-Testing
-      ↓
+     ↓
+Controlled Testing
+     ↓
 Experimental Evaluation
-      ↓
-Validation
-      ↓
+     ↓
+Validation and Limitations
+     ↓
 Benchmarking
-      ↓
+     ↓
+Documentation
+     ↓
 Release
 ```
 
-Implementation alone does not constitute scientific validation.
+The process may be adapted to the nature of a particular feature, but
+implementation alone does not establish scientific validity.
 
----
+------------------------------------------------------------------------
 
-# 8. LONG-TERM ROADMAP
+# 9. BENCHMARKING AND REPORTING PRINCIPLES
 
-```text
+To make Cerium Delta's results useful and interpretable:
+
+-   State what each metric measures and what it does not measure.
+-   Document the model architecture and relevant experimental
+    configuration.
+-   Record dataset, training, and hardware conditions when they affect
+    interpretation.
+-   Separate direct measurements from inferred or indirect signals.
+-   Avoid treating a single score as a universal measure of model
+    quality.
+-   Report limitations, uncertainty, and cases where comparisons may not
+    be valid.
+-   Make performance claims reproducible wherever possible.
+
+------------------------------------------------------------------------
+
+# 10. LONG-TERM VISION
+
+Cerium Delta's development is organized around four complementary
+directions:
+
+``` text
                          CERIUM DELTA
-                              │
-                              ▼
-              V2 — NATIVE & OPTIMIZATION
-                              │
-          ┌───────────────────┼───────────────────┐
-          │                   │                   │
-         C++                OpenGL           Activation
-          │                   │                Metrics
-          │                   │                   │
-          └───────────────────┼───────────────────┘
-                              │
-                              ▼
-                Optimizer Behavior Metrics
-                              │
-                              ▼
-                Optimizer Formula Metrics
-                              │
-                              ▼
-              V3 — ARCHITECTURE EFFECTIVENESS
-                              │
-       ┌──────────────┬───────┼────────┬──────────────┐
-       │              │       │        │              │
-     Node.js         Rust   Forward  Backward      Inference
-                           Effect.    Effect.        Effect.
-       │              │       │        │              │
-       └──────────────┴───────┼────────┴──────────────┘
-                              │
-                              ▼
-                  Architecture Health
-                       Indexing
-                              │
-                              ▼
-                    Future Research
+                              |
+          +-------------------+-------------------+
+          |                   |                   |
+          v                   v                   v
+         V1                  V2               FUTURE VERSIONS
+          |                   |                   |
+          v                   v              +----+----+
+         LSS                 EQS             |         |
+          |                   |              v         v
+          v                   v             V3        V4
+   Pre-training        Evolution and         |         |
+   architecture        optimization          v         v
+   benchmarking        evaluation       Computational Visualization
+                                         efficiency   development
 ```
 
----
+**V1 --- Understand architectural sensitivity before training.**
 
-# 9. FUTURE VISION
+**V2 --- Expand metric diversity and investigate model evolution,
+optimizer impact, and predictive behaviour.**
 
-> **V2 → Native Visualization & Optimization Analysis**
+**V3 --- Improve computational speed and memory efficiency.**
 
-> **V3 → Cross-Language Support & Architecture Effectiveness**
+**V4 --- Improve graphical understanding and visualization of
+neural-network architectures.**
 
-The long-term direction may extend beyond V3 as new research opportunities,
-technologies, and analytical methods emerge.
+These directions describe the current development vision and may evolve
+as research progresses.
 
----
+------------------------------------------------------------------------
 
-# 10. AUTHORSHIP
+# 11. AUTHORSHIP
 
-**Author / Project Lead:** @neural-y
+**Author / Project Lead:** @neural-y\
 **Role:** Founder & Project Lead
 
-At the time of this charter, @neural-y is the sole author and project lead.
-Future contributors and collaborators may be recognized separately as the
+At the time of this charter, @neural-y is the project lead. Future
+contributors and collaborators may be recognized separately as the
 project develops.
 
----
+------------------------------------------------------------------------
 
-# 11. DECLARATION
+# 12. DECLARATION
 
-This charter records the intended future development direction of
-Cerium Delta. The capabilities described for V2 and V3 represent planned
-research and engineering directions. They are not guarantees of
-implementation, release dates, or scientific validation.
+This charter records the current intended development direction of
+Cerium Delta as of 17 November 2026.
 
-The roadmap may be revised as research, experimentation, and technical
-development progress. Substantive revisions are logged in Section 13.
+The version descriptions and timeframes are planning statements. They do
+not guarantee implementation, release dates, or scientific validation.
+Metric definitions and technical approaches may change in response to
+research findings, experimentation, and feasibility.
 
----
+The project should prioritize mathematical clarity, reproducible
+evidence, transparent limitations, and useful measurements over
+premature claims or feature expansion.
 
-# 12. SIGNATURE
-
-## PROJECT AUTHOR / LEAD
-
-**Name:** @neural-y
-**Role:** Founder & Project Lead
-**Electronic Signature:** **/s/ @neural-y**
-**Date:** 21 August 2026
-
----
+------------------------------------------------------------------------
 
 # 13. CHANGELOG
 
-| Version | Date | Change |
-|---|---|---|
-| 1.0 | 21 August 2026 | Initial charter |
-| 1.1 | 21 August 2026 | Consolidated repeated disclaimers into a single governing note (Section 1); distinguished 3.4 (empirical optimizer behavior) from 3.5 (analytical optimizer formula metrics); added open research questions and candidate starting approaches to V3 sections 4.3–4.6; added integration-path column to Section 5 language table |
-| 1.2 | 22 August 2026 | Added expected timeframes: V2 (1 Sep – 15 Oct 2026), V3 (30 Oct – 15 Nov 2026), reflected in Sections 3, 4, and 5 |
+  -----------------------------------------------------------------------
+  Version                 Date                    Change
+  ----------------------- ----------------------- -----------------------
+  2.0                     17 November 2026        Replaced the previous
+                                                  roadmap with the
+                                                  updated V1--V4
+                                                  direction: LSS for
+                                                  pre-training
+                                                  architecture
+                                                  benchmarking; EQS and
+                                                  metric diversity for
+                                                  V2; computational
+                                                  efficiency for V3; and
+                                                  advanced architecture
+                                                  visualization for V4.
+                                                  Updated target
+                                                  timeframes and research
+                                                  principles.
 
----
+  -----------------------------------------------------------------------
 
-**Document ID:** CD-DC-001
-**Version:** 1.0.0
-**Status:** Active
+------------------------------------------------------------------------
+
+**Document ID:** CD-DC-002\
+**Version:** 2.0\
+**Status:** Active\
 **Author:** @neural-y
 
-══════════════════════════════════════════════════════
+------------------------------------------------------------------------
 
-                    CERIUM DELTA
+**CERIUM DELTA**\
+*BEYOND VISUALIZATION*
 
-              **BEYOND VISUALIZATION**
-
-        *Toward Measurable Neural Architecture Behavior*
-
-══════════════════════════════════════════════════════
+*Toward Measurable Neural Architecture Behavior*
